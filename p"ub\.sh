@@ -25,6 +25,8 @@ declare -A dependencies=(
   ["flutter_lints"]=""
   ["mime"]="^1.0.4"
   ["http_parser"]="^4.0.2"
+  ["url_launcher"]="^6.3.1"
+  ["shimmer"]=""
   
 )
 
