@@ -1,14 +1,13 @@
 #!/usr/bin/env bash
 
-echo "📁 Creating Custom API Method..."
+echo "📁 Creating YOUR CODE API METHOD..."
 
 BASE_DIR="lib"
-mkdir -p "$BASE_DIR/core/api/services"
-touch "$BASE_DIR/core/api/services/api_request.dart"
 
-echo "✅ Folder created. Writing Dart code..."
 
-cat <<"EOF" > "$BASE_DIR/core/api/services/api_request.dart"
+
+#API METHOD CODE WRITE
+cat > "$BASE_DIR/core/api/services/api_request.dart" <<EOF
 import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
@@ -388,4 +387,11 @@ class ApiRequest {
 }
 EOF
 
-echo "✅ Dart file written to: $BASE_DIR/core/api/services/api_request.dart"
+echo "✅ HELPERS CODE created"
+
+
+
+
+
+
+echo "🚀 Code Writing successfully!"
