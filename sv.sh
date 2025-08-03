@@ -20,7 +20,7 @@ for viewName in "$@"; do
 import 'package:get/get.dart';
 
 class ${capitalizedViewName}Controller extends GetxController {
-  // TODO: Logic add korte hobe ekhane
+  // TODO: Logic
 }
 EOF
 
@@ -30,6 +30,7 @@ part of "${viewName}_screen.dart";
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:your_project_name/utils/dimensions.dart'; // 🔁 Make sure to update path or adjust based on your project
 
 class ${capitalizedViewName}ScreenMobile extends GetView<${capitalizedViewName}Controller> {
   const ${capitalizedViewName}ScreenMobile({super.key});
@@ -39,8 +40,10 @@ class ${capitalizedViewName}ScreenMobile extends GetView<${capitalizedViewName}C
     return Scaffold(
       body: SafeArea(
         child: ListView(
-          padding: EdgeInsets.all(16.0),
-          children: const [],
+          padding: Dimensions.defaultHorizontalSize.edgeHorizontal,
+          children: [
+            
+          ],
         ),
       ),
     );
@@ -53,15 +56,14 @@ EOF
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controller/${viewName}_controller.dart';
-
-part '${viewName}_screen_mobile.dart';
+import '${viewName}_screen_mobile.dart';
 
 class ${capitalizedViewName}Screen extends GetView<${capitalizedViewName}Controller> {
   const ${capitalizedViewName}Screen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ${capitalizedViewName}ScreenMobile();
+    return Layout(mobile: ${capitalizedViewName}ScreenMobile());
   }
 }
 EOF
