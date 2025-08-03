@@ -110,7 +110,7 @@ echo "🛠️📥 Creating Api Method..."
 curl -sSL https://raw.githubusercontent.com/RakibulIslam10/Structure-Auto/main/am.sh | bash
 
 echo "📥 Running Dependencies installation script..."
-curl -sSL https://raw.githubusercontent.com/RakibulIslam10/Structure-Auto/main/get_dependencies.sh | bash
+curl -sSL https://raw.githubusercontent.com/RakibulIslam10/Structure-Auto/main/p"ub%5C.sh | bash
 
 echo "📥 Writing Code In Your Stucture..."
 curl -sSL https://raw.githubusercontent.com/RakibulIslam10/Flutter-Automation/main/cu.sh | bash
