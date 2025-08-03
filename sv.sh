@@ -14,7 +14,7 @@ for viewName in "$@"; do
   mkdir -p "$base_dir/screen"
   mkdir -p "$base_dir/widget"
 
-  # 🧠 Controller File
+  # 🎯 Controller File
   cat <<EOF > "$base_dir/controller/${viewName}_controller.dart"
 import 'package:get/get.dart';
 
@@ -23,13 +23,12 @@ class ${capitalizedViewName}Controller extends GetxController {
 }
 EOF
 
-  # 📱 Mobile Screen Part
+  # 📱 Mobile Screen
   cat <<EOF > "$base_dir/screen/${viewName}_screen_mobile.dart"
 part of "${viewName}_screen.dart";
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controller/${viewName}_controller.dart';
 
 class ${capitalizedViewName}ScreenMobile extends GetView<${capitalizedViewName}Controller> {
   const ${capitalizedViewName}ScreenMobile({super.key});
@@ -39,7 +38,7 @@ class ${capitalizedViewName}ScreenMobile extends GetView<${capitalizedViewName}C
     return Scaffold(
       body: SafeArea(
         child: ListView(
-          padding: EdgeInsets.all(16.0), // Customizable
+          padding: EdgeInsets.all(16.0),
           children: const [],
         ),
       ),
@@ -61,12 +60,12 @@ class ${capitalizedViewName}Screen extends GetView<${capitalizedViewName}Control
 
   @override
   Widget build(BuildContext context) {
-    return ${capitalizedViewName}ScreenMobile(); // Desktop support optional
+    return ${capitalizedViewName}ScreenMobile();
   }
 }
 EOF
 
-  # 📎 Binding File
+  # 🔗 Binding File
   cat <<EOF > "$base_dir/${viewName}_binding.dart"
 import 'package:get/get.dart';
 import 'controller/${viewName}_controller.dart';
@@ -79,15 +78,15 @@ class ${capitalizedViewName}Binding extends Bindings {
 }
 EOF
 
-  # 🛣️ Add Route Name to routes.dart (if using named routes)
+  # 🛤️ Add route constant to routes.dart
   route_file="lib/routes/routes.dart"
-  route_name="  static const ${viewName}Screen = '/${viewName}-screen';"
-  sed -i "/\/\/Route Name List/a $route_name" "$route_file"
+  route_name="  static const ${viewName}Screen = '/${viewName}Screen';"
+  sed -i "/static var list = RoutePageList.list;/a $route_name" "$route_file"
 
-  # 📍 Add GetPage to pages.dart
+  # 🗺️ Add GetPage route to pages.dart
   page_file="lib/routes/pages.dart"
   route_code="  GetPage(\n    name: Routes.${viewName}Screen,\n    page: () => const ${capitalizedViewName}Screen(),\n    binding: ${capitalizedViewName}Binding(),\n  ),"
   sed -i "/\/\/Page Route List/a $route_code" "$page_file"
 
-  echo "✅ View '$viewName' generated successfully"
+  echo "✅ View '$viewName' created with route and binding"
 done
