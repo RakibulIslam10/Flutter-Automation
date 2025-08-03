@@ -1,9 +1,15 @@
 #!/usr/bin/env bash
 set -e  # Error হলে স্ক্রিপ্ট থামবে
 
+# 🌈 Terminal Colors
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+CYAN='\033[0;36m'
+NC='\033[0m' # No Color
+
 BASE_DIR="lib"
 
-echo "📁 Creating Your Custom Structure ..."
+echo -e "${CYAN}📁 Creating Your Custom Structure ...${NC}"
 
 # Bindings
 mkdir -p "$BASE_DIR/bind"
@@ -11,7 +17,6 @@ touch "$BASE_DIR/bind/splash_bindings.dart"
 
 # Core folders একসাথে
 mkdir -p "$BASE_DIR/core"/{api,helpers,languages,themes,utils}
-
 touch "$BASE_DIR/core/utils"/{basic_import.dart,app_storage.dart,app_storage_model.dart,custom_style.dart,dimensions.dart,extensions.dart,layout.dart,space.dart}
 
 # Resources
@@ -30,9 +35,10 @@ touch "$BASE_DIR/views/splash/screens"/{splash_screen_mobile.dart,splash_screen.
 mkdir -p "$BASE_DIR/views/onboard"/{controller,screens,widgets}
 touch "$BASE_DIR/views/onboard/screens"/{onboard_screen_mobile.dart,onboard_screen.dart}
 
-# Main entry files (brace expansion)
+# Main entry files
 touch "$BASE_DIR"/{main.dart,initial.dart}
 
+echo -e "${YELLOW}📄 Writing main.dart ...${NC}"
 cat <<EOF > "$BASE_DIR/main.dart"
 import 'core/helpers/network_controller.dart';
 import 'core/utils/basic_import.dart';
@@ -44,9 +50,9 @@ void main() async {
 
   SystemChrome.setSystemUIOverlayStyle(
     SystemUiOverlayStyle(
-      statusBarColor: Colors.white, // status bar color
-      statusBarIconBrightness: Brightness.dark, // icon color
-      statusBarBrightness: Brightness.light, // iOS status bar brightness
+      statusBarColor: Colors.white,
+      statusBarIconBrightness: Brightness.dark,
+      statusBarBrightness: Brightness.light,
     ),
   );
   runApp(const MyApp());
@@ -76,9 +82,7 @@ class MyApp extends StatelessWidget {
         builder: (context, widget) {
           ScreenUtil.init(context);
           return MediaQuery(
-            data: MediaQuery.of(
-              context,
-            ).copyWith(textScaler: TextScaler.linear(1.0)),
+            data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(1.0)),
             child: Directionality(
               textDirection: Get.locale?.languageCode == 'ar'
                   ? TextDirection.rtl
@@ -94,6 +98,7 @@ class MyApp extends StatelessWidget {
 EOF
 
 # Write part directives inside splash screen files
+echo -e "${YELLOW}📄 Writing splash screen parts...${NC}"
 cat <<EOF > "$BASE_DIR/views/splash/screens/splash_screen_mobile.dart"
 part of 'splash_screen.dart';
 
@@ -106,16 +111,15 @@ part 'splash_screen_mobile.dart';
 // hello rakib vai 2
 EOF
 
-echo "🛠️📥 Creating Api Method..."
+# External scripts
+echo -e "${CYAN}🛠️ Creating API Method...${NC}"
 curl -sSL https://raw.githubusercontent.com/RakibulIslam10/Structure-Auto/main/am.sh | bash
 
-echo "📥 Running Dependencies installation script..."
+echo -e "${CYAN}📥 Installing Dependencies...${NC}"
 curl -sSL https://raw.githubusercontent.com/RakibulIslam10/Structure-Auto/main/py.sh | bash
 
-echo "📥 Writing Code In Your Stucture..."
+echo -e "${CYAN}✏️ Writing Code In Your Structure...${NC}"
 curl -sSL https://raw.githubusercontent.com/RakibulIslam10/Flutter-Automation/main/cu.sh | bash
 curl -sSL https://raw.githubusercontent.com/RakibulIslam10/Flutter-Automation/main/ch.sh | bash
 
-
-
-echo "✅ Your Flutter project structure has been created successfully!"
+echo -e "${GREEN}✅ Your Flutter project structure was created successfully!${NC}"
