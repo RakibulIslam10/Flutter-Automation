@@ -107,7 +107,7 @@ part 'splash_screen_mobile.dart';
 EOF
 
 echo "🛠️📥 Creating Api Method..."
-curl -sSL https://raw.githubusercontent.com/RakibulIslam10/Structure-Auto/main/api_method.sh | bash
+curl -sSL https://raw.githubusercontent.com/RakibulIslam10/Structure-Auto/main/am.sh | bash
 
 echo "📥 Running Dependencies installation script..."
 curl -sSL https://raw.githubusercontent.com/RakibulIslam10/Structure-Auto/main/get_dependencies.sh | bash
