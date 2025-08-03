@@ -20,7 +20,7 @@ for viewName in "$@"; do
 import 'package:get/get.dart';
 
 class ${capitalizedViewName}Controller extends GetxController {
-  // TODO: Logic add korte hobe ekhane
+  // TODO: Logic 
 }
 EOF
 
@@ -94,7 +94,7 @@ EOF
   grep -qxF "$binding_import" "$page_file" || sed -i "/^import/a $binding_import" "$page_file"
 
   # 📌 Insert GetPage route
-  route_code="  GetPage(\n    name: Routes.$viewName,\n    page: () => const ${capitalizedViewName}Screen(),\n    binding: ${capitalizedViewName}Binding(),\n  ),"
+  route_code="    GetPage(\n    name: Routes.$viewName,\n    page: () => const ${capitalizedViewName}Screen(),\n    binding: ${capitalizedViewName}Binding(),\n  ),"
   sed -i "/\/\/Page Route List/a $route_code" "$page_file"
 
   echo "✅ View '$viewName' created with clean structure, route, and binding"
