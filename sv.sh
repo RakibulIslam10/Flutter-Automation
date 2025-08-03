@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 🔠 Function: Capitalize first letter of view name
+# 🔠 Capitalize first letter
 capitalize() {
   echo "$1" | awk '{ print toupper(substr($0,1,1)) tolower(substr($0,2)) }'
 }
@@ -20,17 +20,16 @@ for viewName in "$@"; do
 import 'package:get/get.dart';
 
 class ${capitalizedViewName}Controller extends GetxController {
-  // TODO: Logic
+  // TODO: Logic add korte hobe ekhane
 }
 EOF
 
-  # 📱 Mobile Screen
+  # 📱 Mobile Screen File
   cat <<EOF > "$base_dir/screen/${viewName}_screen_mobile.dart"
-part of "${viewName}_screen.dart";
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:your_project_name/utils/dimensions.dart'; // 🔁 Make sure to update path or adjust based on your project
+import 'package:your_project_name/core/utils/dimensions.dart'; // Adjust this path if needed
+import '../controller/${viewName}_controller.dart';
 
 class ${capitalizedViewName}ScreenMobile extends GetView<${capitalizedViewName}Controller> {
   const ${capitalizedViewName}ScreenMobile({super.key});
@@ -83,7 +82,7 @@ EOF
 
   # 🛤️ Add route constant to routes.dart
   route_file="lib/routes/routes.dart"
-  route_const="  static const ${viewName} = '/$viewName';"
+  route_const="  static const $viewName = '/$viewName';"
   grep -qxF "$route_const" "$route_file" || sed -i "/static var list = RoutePageList.list;/a $route_const" "$route_file"
 
   # 📥 Add GetPage to pages.dart
@@ -91,13 +90,13 @@ EOF
   screen_import="import '../views/$viewName/screen/${viewName}_screen.dart';"
   binding_import="import '../bind/${viewName}_binding.dart';"
 
-  # Only add imports if not already present
+  # Import check and insert
   grep -qxF "$screen_import" "$page_file" || sed -i "/^import/a $screen_import" "$page_file"
   grep -qxF "$binding_import" "$page_file" || sed -i "/^import/a $binding_import" "$page_file"
 
-  # 📌 Add GetPage route
-  route_code="  GetPage(\n    name: Routes.${viewName},\n    page: () => const ${capitalizedViewName}Screen(),\n    binding: ${capitalizedViewName}Binding(),\n  ),"
+  # 📌 Insert GetPage
+  route_code="  GetPage(\n    name: Routes.$viewName,\n    page: () => const ${capitalizedViewName}Screen(),\n    binding: ${capitalizedViewName}Binding(),\n  ),"
   sed -i "/\/\/Page Route List/a $route_code" "$page_file"
 
-  echo "✅ View '$viewName' created with binding & route"
+  echo "✅ View '$viewName' created with proper screen, binding & route"
 done
