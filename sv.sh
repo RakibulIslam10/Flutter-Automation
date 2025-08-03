@@ -26,10 +26,7 @@ EOF
 
   # 📱 Mobile Screen File
   cat <<EOF > "$base_dir/screen/${viewName}_screen_mobile.dart"
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:your_project_name/core/utils/dimensions.dart'; // Adjust this path if needed
-import '../controller/${viewName}_controller.dart';
+part of '${viewName}_screen.dart';
 
 class ${capitalizedViewName}ScreenMobile extends GetView<${capitalizedViewName}Controller> {
   const ${capitalizedViewName}ScreenMobile({super.key});
@@ -54,8 +51,10 @@ EOF
   cat <<EOF > "$base_dir/screen/${viewName}_screen.dart"
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../core/utils/dimensions.dart';
 import '../controller/${viewName}_controller.dart';
-import '${viewName}_screen_mobile.dart';
+
+part '${viewName}_screen_mobile.dart';
 
 class ${capitalizedViewName}Screen extends GetView<${capitalizedViewName}Controller> {
   const ${capitalizedViewName}Screen({super.key});
@@ -67,7 +66,7 @@ class ${capitalizedViewName}Screen extends GetView<${capitalizedViewName}Control
 }
 EOF
 
-  # 🔗 Binding File (lib/bind/)
+  # 🔗 Binding File
   cat <<EOF > "lib/bind/${viewName}_binding.dart"
 import 'package:get/get.dart';
 import '../views/$viewName/controller/${viewName}_controller.dart';
@@ -90,13 +89,13 @@ EOF
   screen_import="import '../views/$viewName/screen/${viewName}_screen.dart';"
   binding_import="import '../bind/${viewName}_binding.dart';"
 
-  # Import check and insert
+  # Import if not already present
   grep -qxF "$screen_import" "$page_file" || sed -i "/^import/a $screen_import" "$page_file"
   grep -qxF "$binding_import" "$page_file" || sed -i "/^import/a $binding_import" "$page_file"
 
-  # 📌 Insert GetPage
+  # 📌 Insert GetPage route
   route_code="  GetPage(\n    name: Routes.$viewName,\n    page: () => const ${capitalizedViewName}Screen(),\n    binding: ${capitalizedViewName}Binding(),\n  ),"
   sed -i "/\/\/Page Route List/a $route_code" "$page_file"
 
-  echo "✅ View '$viewName' created with proper screen, binding & route"
+  echo "✅ View '$viewName' created with clean structure, route, and binding"
 done
