@@ -112,4 +112,9 @@ curl -sSL https://raw.githubusercontent.com/RakibulIslam10/Structure-Auto/main/a
 echo "📥 Running Dependencies installation script..."
 curl -sSL https://raw.githubusercontent.com/RakibulIslam10/Structure-Auto/main/get_dependencies.sh | bash
 
+echo "📥 Writing Code In Your Stucture..."
+curl -sSL https://raw.githubusercontent.com/RakibulIslam10/Flutter-Automation/refs/heads/main/%3C%3E.sh | bash
+
+
+
 echo "✅ Your Flutter project structure has been created successfully!"
