@@ -113,7 +113,7 @@ echo "📥 Running Dependencies installation script..."
 curl -sSL https://raw.githubusercontent.com/RakibulIslam10/Structure-Auto/main/get_dependencies.sh | bash
 
 echo "📥 Writing Code In Your Stucture..."
-curl -sSL https://raw.githubusercontent.com/RakibulIslam10/Flutter-Automation/main/c.sh | bash
+curl -sSL https://raw.githubusercontent.com/RakibulIslam10/Flutter-Automation/main/cu.sh | bash
 
 
 
