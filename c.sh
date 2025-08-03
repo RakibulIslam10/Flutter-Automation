@@ -5,7 +5,6 @@ echo "📁 Creating YOUR CODE STRUCTURE..."
 BASE_DIR="lib"
 
 
-lib/core/utils/app_storage.dart
 # Write basic_import.dart file
 cat > "$BASE_DIR/core/utils//basic_import.dart" <<EOF
 export 'package:flutter/material.dart';
@@ -185,5 +184,193 @@ class AppStorageModel {
 EOF
 
 echo "✅ app_storage_model.dart created"
+
+
+
+cat > "$BASE_DIR/core/utils//space.dart" <<EOF
+import 'package:flutter/material.dart';
+import 'dimensions.dart';
+
+class Space {
+  static SizeHeightModel height = SizeHeightModel(
+    btnInputTitleAndBox:
+        SizedBox(height: Dimensions.spaceBetweenInputTitleAndBox),
+    betweenInputBox: SizedBox(height: Dimensions.spaceBetweenInputBox),
+    v5: SizedBox(height: Dimensions.heightSize * 0.5),
+    v10: SizedBox(height: Dimensions.heightSize),
+    v15: SizedBox(height: Dimensions.heightSize * 1.5),
+    v20: SizedBox(height: Dimensions.heightSize * 2),
+    v25: SizedBox(height: Dimensions.heightSize * 2.5),
+    v30: SizedBox(height: Dimensions.heightSize * 3),
+    v40: SizedBox(height: Dimensions.heightSize * 4),
+  );
+
+  static SizeWidthModel width = SizeWidthModel(
+    v5: SizedBox(width: Dimensions.widthSize * 0.5),
+    v10: SizedBox(width: Dimensions.widthSize),
+    v15: SizedBox(width: Dimensions.widthSize * 1.5),
+    v20: SizedBox(width: Dimensions.widthSize * 2),
+    v25: SizedBox(width: Dimensions.widthSize * 2.5),
+    v30: SizedBox(width: Dimensions.widthSize * 3),
+    v40: SizedBox(width: Dimensions.widthSize * 4),
+  );
+}
+
+class SizeHeightModel {
+  final SizedBox btnInputTitleAndBox;
+  final SizedBox betweenInputBox;
+  final SizedBox v5;
+  final SizedBox v10;
+  final SizedBox v15;
+  final SizedBox v20;
+  final SizedBox v25;
+  final SizedBox v30;
+  final SizedBox v40;
+
+  SizedBox add(double value) => SizedBox(height: value);
+
+  SizeHeightModel({
+    required this.btnInputTitleAndBox,
+    required this.betweenInputBox,
+    required this.v5,
+    required this.v10,
+    required this.v15,
+    required this.v20,
+    required this.v25,
+    required this.v30,
+    required this.v40,
+  });
+}
+
+class SizeWidthModel {
+  final SizedBox v5;
+  final SizedBox v10;
+  final SizedBox v15;
+  final SizedBox v20;
+  final SizedBox v25;
+  final SizedBox v30;
+  final SizedBox v40;
+
+  SizedBox add(double value) => SizedBox(width: value);
+
+  SizeWidthModel({
+    required this.v5,
+    required this.v10,
+    required this.v15,
+    required this.v20,
+    required this.v25,
+    required this.v30,
+    required this.v40,
+  });
+}
+
+MainAxisAlignment mainStart = MainAxisAlignment.start;
+MainAxisAlignment mainCenter = MainAxisAlignment.center;
+MainAxisAlignment mainEnd = MainAxisAlignment.end;
+MainAxisAlignment mainSpaceBet = MainAxisAlignment.spaceBetween;
+MainAxisSize mainMax = MainAxisSize.max;
+MainAxisSize mainMin = MainAxisSize.min;
+CrossAxisAlignment crossStart = CrossAxisAlignment.start;
+CrossAxisAlignment crossCenter = CrossAxisAlignment.center;
+CrossAxisAlignment crossEnd = CrossAxisAlignment.end;
+CrossAxisAlignment crossStretch = CrossAxisAlignment.stretch;
+
+// Floating Action Button Location
+FloatingActionButtonLocation centerDocked =
+    FloatingActionButtonLocation.centerDocked;
+FloatingActionButtonLocation centerFloat =
+    FloatingActionButtonLocation.centerFloat;
+EOF
+
+echo "✅ space.dart created"
+
+
+
+cat > "$BASE_DIR/core/utils//layout.dart" <<EOF
+import 'package:flutter/material.dart';
+import 'dimensions.dart';
+
+class Layout extends StatelessWidget {
+  final Widget mobile;
+  final Widget? tablet;
+  final Widget? desktop;
+
+  const Layout({super.key, required this.mobile, this.tablet, this.desktop});
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth < Dimensions.mobileScreenWidth) {
+          return mobile;
+        } else if (constraints.maxWidth < Dimensions.tabletScreenWidth) {
+          // return tablet ?? mobile; =>>  use this for tablet
+          return mobile;
+        } else {
+          return desktop ?? mobile;
+        }
+      },
+    );
+  }
+}
+EOF
+
+echo "✅ layout.dart created"
+
+
+cat > "$BASE_DIR/core/utils//extensions.dart" <<EOF
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
+extension SupperEdgeInsets on num {
+  /// EdgeInsets
+  EdgeInsets get edgeHorizontal => EdgeInsets.symmetric(horizontal: toDouble());
+  EdgeInsets get edgeVertical => EdgeInsets.symmetric(vertical: toDouble());
+  EdgeInsets get edgeTop => EdgeInsets.only(top: toDouble());
+  EdgeInsets get edgeBottom => EdgeInsets.only(bottom: toDouble());
+  EdgeInsets get edgeLeft => EdgeInsets.only(left: toDouble());
+  EdgeInsets get edgeRight => EdgeInsets.only(right: toDouble());
+
+  /// BorderRadius
+  BorderRadius get radiusEx => BorderRadius.circular(toDouble());
+  BorderRadius get radiusTopEx => BorderRadius.only(
+    topLeft: Radius.circular(toDouble()),
+    topRight: Radius.circular(toDouble()),
+  );
+}
+EOF
+
+echo "✅ extension.dart created"
+
+
+cat > "$BASE_DIR/core/utils//custom_style.dart" <<EOF
+import 'package:flutter/material.dart';
+import 'dimensions.dart';
+
+class CustomStyle {
+  static TextStyle displayLarge = TextStyle(fontSize: Dimensions.displayLarge);
+  static TextStyle displayMedium =
+      TextStyle(fontSize: Dimensions.displayMedium);
+  static TextStyle displaySmall = TextStyle(fontSize: Dimensions.displaySmall);
+  static TextStyle headlineLarge =
+      TextStyle(fontSize: Dimensions.headlineLarge);
+  static TextStyle headlineMedium =
+      TextStyle(fontSize: Dimensions.headlineMedium);
+  static TextStyle headlineSmall =
+      TextStyle(fontSize: Dimensions.headlineSmall);
+  static TextStyle titleLarge = TextStyle(fontSize: Dimensions.titleLarge);
+  static TextStyle titleMedium = TextStyle(fontSize: Dimensions.titleMedium);
+  static TextStyle titleSmall = TextStyle(fontSize: Dimensions.titleSmall);
+  static TextStyle bodyLarge = TextStyle(fontSize: Dimensions.bodyLarge);
+  static TextStyle bodyMedium = TextStyle(fontSize: Dimensions.bodyMedium);
+  static TextStyle bodySmall = TextStyle(fontSize: Dimensions.bodySmall);
+  static TextStyle labelLarge = TextStyle(fontSize: Dimensions.labelLarge);
+  static TextStyle labelMedium = TextStyle(fontSize: Dimensions.labelMedium);
+  static TextStyle labelSmall = TextStyle(fontSize: Dimensions.labelSmall);
+}
+EOF
+
+echo "✅ extension.dart created"
+
 
 echo "🚀 All files and structure created successfully!"
