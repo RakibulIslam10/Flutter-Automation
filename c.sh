@@ -4,27 +4,10 @@ echo "📁 Creating YOUR CODE STRUCTURE..."
 
 BASE_DIR="lib"
 
-# Create necessary folders
-mkdir -p "$BASE_DIR/core/api/services"
-mkdir -p "$BASE_DIR/core/core/utils"
 
-# Write api_request.dart file
-cat > "$BASE_DIR/core/api/services/api_request.dart" <<EOF
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-
-class ApiRequest {
-  static Future<Map<String, dynamic>> get(String url) async {
-    final response = await http.get(Uri.parse(url));
-    return json.decode(response.body);
-  }
-}
-EOF
-
-echo "✅ api_request.dart created"
-
+lib/core/utils/app_storage.dart
 # Write basic_import.dart file
-cat > "$BASE_DIR/core/core/utils/basic_import.dart" <<EOF
+cat > "$BASE_DIR/core/utils//basic_import.dart" <<EOF
 export 'package:flutter/material.dart';
 export 'custom_style.dart';
 export 'dimensions.dart';
@@ -47,7 +30,7 @@ EOF
 echo "✅ basic_import.dart created"
 
 # Write dimensions.dart file
-cat > "$BASE_DIR/core/core/utils/dimensions.dart" <<EOF
+cat > "$BASE_DIR/core/utils//dimensions.dart" <<EOF
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class Dimensions {
@@ -100,7 +83,7 @@ EOF
 echo "✅ dimensions.dart created"
 
 # Write app_storage.dart file
-cat > "$BASE_DIR/core/core/utils/app_storage.dart" <<EOF
+cat > "$BASE_DIR/core/utils/app_storage.dart" <<EOF
 import 'package:get_storage/get_storage.dart';
 import 'app_storage_model.dart';
 
@@ -173,7 +156,7 @@ EOF
 echo "✅ app_storage.dart created"
 
 # Write app_storage_model.dart file
-cat > "$BASE_DIR/core/core/utils/app_storage_model.dart" <<EOF
+cat > "$BASE_DIR/core/utils/app_storage_model.dart" <<EOF
 class AppStorageModel {
   final String token;
   final String temporaryToken;
