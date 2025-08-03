@@ -21,6 +21,11 @@ declare -A dependencies=(
   ["intl"]=""
   ["cached_network_image"]=""
   ["google_sign_in"]="^6.3.0"
+  ["connectivity_plus"]=""
+  ["flutter_lints"]=""
+  ["mime"]="^1.0.4"
+  ["http_parser"]="^4.0.2"
+  
 )
 
 # Step 3: Parse existing pubspec.yaml to avoid duplicates
