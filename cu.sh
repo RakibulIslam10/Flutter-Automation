@@ -4,9 +4,11 @@ echo "📁 Creating YOUR CODE STRUCTURE..."
 
 BASE_DIR="lib"
 
+# Create necessary directories first
+mkdir -p "$BASE_DIR/core/utils"
 
-# Write basic_import.dart file
-cat > "$BASE_DIR/core/utils//basic_import.dart" <<EOF
+# basic_import.dart
+cat > "$BASE_DIR/core/utils/basic_import.dart" <<EOF
 export 'package:flutter/material.dart';
 export 'custom_style.dart';
 export 'dimensions.dart';
@@ -28,8 +30,8 @@ EOF
 
 echo "✅ basic_import.dart created"
 
-# Write dimensions.dart file
-cat > "$BASE_DIR/core/utils//dimensions.dart" <<EOF
+# dimensions.dart
+cat > "$BASE_DIR/core/utils/dimensions.dart" <<EOF
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class Dimensions {
@@ -81,7 +83,7 @@ EOF
 
 echo "✅ dimensions.dart created"
 
-# Write app_storage.dart file
+# app_storage.dart
 cat > "$BASE_DIR/core/utils/app_storage.dart" <<EOF
 import 'package:get_storage/get_storage.dart';
 import 'app_storage_model.dart';
@@ -154,7 +156,7 @@ EOF
 
 echo "✅ app_storage.dart created"
 
-# Write app_storage_model.dart file
+# app_storage_model.dart
 cat > "$BASE_DIR/core/utils/app_storage_model.dart" <<EOF
 class AppStorageModel {
   final String token;
@@ -185,9 +187,8 @@ EOF
 
 echo "✅ app_storage_model.dart created"
 
-
-
-cat > "$BASE_DIR/core/utils//space.dart" <<EOF
+# space.dart
+cat > "$BASE_DIR/core/utils/space.dart" <<EOF
 import 'package:flutter/material.dart';
 import 'dimensions.dart';
 
@@ -284,9 +285,8 @@ EOF
 
 echo "✅ space.dart created"
 
-
-
-cat > "$BASE_DIR/core/utils//layout.dart" <<EOF
+# layout.dart
+cat > "$BASE_DIR/core/utils/layout.dart" <<EOF
 import 'package:flutter/material.dart';
 import 'dimensions.dart';
 
@@ -317,8 +317,8 @@ EOF
 
 echo "✅ layout.dart created"
 
-
-cat > "$BASE_DIR/core/utils//extensions.dart" <<EOF
+# extensions.dart
+cat > "$BASE_DIR/core/utils/extensions.dart" <<EOF
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -340,10 +340,10 @@ extension SupperEdgeInsets on num {
 }
 EOF
 
-echo "✅ extension.dart created"
+echo "✅ extensions.dart created"
 
-
-cat > "$BASE_DIR/core/utils//custom_style.dart" <<EOF
+# custom_style.dart
+cat > "$BASE_DIR/core/utils/custom_style.dart" <<EOF
 import 'package:flutter/material.dart';
 import 'dimensions.dart';
 
@@ -370,7 +370,6 @@ class CustomStyle {
 }
 EOF
 
-echo "✅ extension.dart created"
-
+echo "✅ custom_style.dart created"
 
 echo "🚀 All files and structure created successfully!"
