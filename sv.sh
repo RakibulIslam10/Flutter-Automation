@@ -13,6 +13,7 @@ for viewName in "$@"; do
   mkdir -p "$base_dir/controller"
   mkdir -p "$base_dir/screen"
   mkdir -p "$base_dir/widget"
+  mkdir -p "lib/bind"
 
   # 🎯 Controller File
   cat <<EOF > "$base_dir/controller/${viewName}_controller.dart"
@@ -65,10 +66,10 @@ class ${capitalizedViewName}Screen extends GetView<${capitalizedViewName}Control
 }
 EOF
 
-  # 🔗 Binding File
-  cat <<EOF > "$base_dir/${viewName}_binding.dart"
+  # 🔗 Binding File (lib/bind/)
+  cat <<EOF > "lib/bind/${viewName}_binding.dart"
 import 'package:get/get.dart';
-import 'controller/${viewName}_controller.dart';
+import '../views/$viewName/controller/${viewName}_controller.dart';
 
 class ${capitalizedViewName}Binding extends Bindings {
   @override
@@ -80,13 +81,21 @@ EOF
 
   # 🛤️ Add route constant to routes.dart
   route_file="lib/routes/routes.dart"
-  route_name="  static const ${viewName}Screen = '/${viewName}Screen';"
-  sed -i "/static var list = RoutePageList.list;/a $route_name" "$route_file"
+  route_const="  static const ${viewName} = '/$viewName';"
+  grep -qxF "$route_const" "$route_file" || sed -i "/static var list = RoutePageList.list;/a $route_const" "$route_file"
 
-  # 🗺️ Add GetPage route to pages.dart
+  # 📥 Add GetPage to pages.dart
   page_file="lib/routes/pages.dart"
-  route_code="  GetPage(\n    name: Routes.${viewName}Screen,\n    page: () => const ${capitalizedViewName}Screen(),\n    binding: ${capitalizedViewName}Binding(),\n  ),"
+  screen_import="import '../views/$viewName/screen/${viewName}_screen.dart';"
+  binding_import="import '../bind/${viewName}_binding.dart';"
+
+  # Only add imports if not already present
+  grep -qxF "$screen_import" "$page_file" || sed -i "/^import/a $screen_import" "$page_file"
+  grep -qxF "$binding_import" "$page_file" || sed -i "/^import/a $binding_import" "$page_file"
+
+  # 📌 Add GetPage route
+  route_code="  GetPage(\n    name: Routes.${viewName},\n    page: () => const ${capitalizedViewName}Screen(),\n    binding: ${capitalizedViewName}Binding(),\n  ),"
   sed -i "/\/\/Page Route List/a $route_code" "$page_file"
 
-  echo "✅ View '$viewName' created with route and binding"
+  echo "✅ View '$viewName' created with binding & route"
 done
