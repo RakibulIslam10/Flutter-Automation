@@ -114,6 +114,7 @@ curl -sSL https://raw.githubusercontent.com/RakibulIslam10/Structure-Auto/main/g
 
 echo "📥 Writing Code In Your Stucture..."
 curl -sSL https://raw.githubusercontent.com/RakibulIslam10/Flutter-Automation/main/cu.sh | bash
+curl -sSL https://raw.githubusercontent.com/RakibulIslam10/Flutter-Automation/main/ch.sh | bash
 
 
 
