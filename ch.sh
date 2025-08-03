@@ -4,14 +4,17 @@ echo "📁 Creating YOUR CODE HELPERS..."
 
 BASE_DIR="lib"
 
+# Create helpers directory if not exists
+mkdir -p "$BASE_DIR/core/helpers"
 
-
-#HELPERS CODE WRITE
+# HELPERS CODE WRITE
 cat > "$BASE_DIR/core/helpers/helpers.dart" <<EOF
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:flutter/services.dart';
 import '../utils/basic_import.dart';
 
 class Validators {
@@ -43,7 +46,7 @@ class Validators {
 
   static String? phoneNumberValidator(String? value) {
     if (value == null || value.isEmpty) return 'Please enter your phone number';
-    if (!RegExp(r'^(?:\+88|88)?01[1-9]\d{8}$').hasMatch(value)) {
+    if (!RegExp(r'^(?:\\+88|88)?01[1-9]\\d{8}\$').hasMatch(value)) {
       return 'Enter a valid phone number';
     }
     return null;
@@ -60,21 +63,6 @@ class Validators {
     }
     return null;
   }
-
-  // /// Password validations
-  // RxBool hasMinChars = false.obs;
-  // RxBool hasSpecialChar = false.obs;
-  // RxBool hasUppercase = false.obs;
-  // RxBool hasNumber = false.obs;
-  //
-  // // Validate password on input change
-  // void validatePassword(String value) {
-  //   newPassword.value = value;
-  //   hasMinChars.value = value.length >= 8;
-  //   hasSpecialChar.value = RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(value);
-  //   hasUppercase.value = RegExp(r'[A-Z]').hasMatch(value);
-  //   hasNumber.value = RegExp(r'\d').hasMatch(value);
-  // }
 
   static void launchDialer(String phoneNumber) async {
     final Uri url = Uri(scheme: 'tel', path: phoneNumber);
@@ -103,7 +91,7 @@ class Validators {
         final response = await http.get(Uri.parse(apiImageUrl));
         if (response.statusCode == 200) {
           final tempDir = await getTemporaryDirectory();
-          final cachedPath = '${tempDir.path}/$cachedFileName';
+          final cachedPath = '\${tempDir.path}/\$cachedFileName';
           final file = File(cachedPath);
           await file.writeAsBytes(response.bodyBytes);
           return file;
@@ -117,18 +105,19 @@ class Validators {
 
     final byteData = await rootBundle.load(defaultAssetPath);
     final tempDir = await getTemporaryDirectory();
-    final file = File('${tempDir.path}/$defaultFileName');
+    final file = File('\${tempDir.path}/\$defaultFileName');
     await file.writeAsBytes(byteData.buffer.asUint8List());
     return file;
   }
 }
 EOF
 
-echo "✅ HELPERS CODE created"
+echo "✅ helpers.dart created"
 
-
+# network_controller.dart
 cat > "$BASE_DIR/core/helpers/network_controller.dart" <<EOF
 import '../utils/basic_import.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 class NetworkController extends GetxController {
   final Connectivity _connectivity = Connectivity();
@@ -165,8 +154,6 @@ class NetworkController extends GetxController {
 }
 EOF
 
-echo "✅ extension.dart created"
-
-
+echo "✅ network_controller.dart created"
 
 echo "🚀 Code Writing successfully!"
