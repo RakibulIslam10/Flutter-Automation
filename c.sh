@@ -1,23 +1,37 @@
 #!/usr/bin/env bash
 
-echo "📁 Creating YOR CODE IN StRUCTURE..."
+echo "📁 Creating YOUR CODE STRUCTURE..."
 
 BASE_DIR="lib"
+
+# Create necessary folders
 mkdir -p "$BASE_DIR/core/api/services"
-touch "$BASE_DIR/core/api/services/api_request.dart"
+mkdir -p "$BASE_DIR/core/core/utils"
 
-echo "✅ Writing Basic Import  Dart code..."
+# Write api_request.dart file
+cat > "$BASE_DIR/core/api/services/api_request.dart" <<EOF
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
-cat <<"EOF" > "$BASE_DIR/core/core/utils/basic_import.dart"
+class ApiRequest {
+  static Future<Map<String, dynamic>> get(String url) async {
+    final response = await http.get(Uri.parse(url));
+    return json.decode(response.body);
+  }
+}
+EOF
+
+echo "✅ api_request.dart created"
+
+# Write basic_import.dart file
+cat > "$BASE_DIR/core/core/utils/basic_import.dart" <<EOF
 export 'package:flutter/material.dart';
-
 export 'custom_style.dart';
 export 'dimensions.dart';
 export 'package:get/get.dart';
 export 'layout.dart';
 export '../themes/token.dart';
 export '../languages/strings.dart';
-
 export 'package:flutter/services.dart';
 export 'package:flutter_screenutil/flutter_screenutil.dart';
 export 'package:starting/initial.dart';
@@ -28,29 +42,23 @@ export 'package:starting/widgets/text_widget.dart';
 export 'package:starting/core/utils/space.dart';
 export 'package:flutter_svg/svg.dart';
 export 'package:starting/widgets/custom_snackbar.dart';
-
 EOF
 
-echo "✅ Basic Import  Dart code successfull"
+echo "✅ basic_import.dart created"
 
-
-echo "✅ Writing Basic DIMENTION  Dart code..."
-
-cat <<"EOF" > "$BASE_DIR/core/core/utils/dimensions.dart"
+# Write dimensions.dart file
+cat > "$BASE_DIR/core/core/utils/dimensions.dart" <<EOF
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class Dimensions {
-  //screen size
   static double mobileScreenWidth = 575;
   static double tabletScreenWidth = 1100;
 
-  // padding and margin
   static double paddingSize = 24.00.h;
   static double verticalSize = 24.00.h;
   static double horizontalSize = 24.00.w;
   static double defaultHorizontalSize = 16.00.w;
 
-  // height size
   static double buttonHeight = 56.00.h;
   static double inputBoxHeight = 56.00.h;
   static double appBarHeight = 38.h;
@@ -59,17 +67,14 @@ class Dimensions {
   static double iconSizeDefault = 16.00.h;
   static double iconSizeLarge = 24.00.h;
 
-  // radius size
   static double radius = 10.00.r;
 
-  // default height and width size
   static double heightSize = 10.00.h;
   static double widthSize = 10.00.w;
   static double spaceBetweenInputTitleAndBox = 8.h;
   static double spaceBetweenInputBox = 16.h;
   static double spaceSizeBetweenColumn = 16.00.w;
 
-  /// Typography
   static double displayLarge = 57.0.sp;
   static double displayMedium = 45.0.sp;
   static double displaySmall = 36.0.sp;
@@ -90,22 +95,18 @@ class Dimensions {
   static double labelMedium = 12.0.sp;
   static double labelSmall = 11.0.sp;
 }
-
 EOF
 
-echo "✅ DIMENTION  Dart code successfull"
+echo "✅ dimensions.dart created"
 
-
-echo "✅ Writing  AppStorage  Dart code..."
-
-cat <<"EOF" > "$BASE_DIR/core/core/utils/app_storage.dart"
+# Write app_storage.dart file
+cat > "$BASE_DIR/core/core/utils/app_storage.dart" <<EOF
 import 'package:get_storage/get_storage.dart';
 import 'app_storage_model.dart';
 
 class AppStorage {
   static final GetStorage _storage = GetStorage();
 
-  /// 1
   static const String tokenKey = 'token';
   static const String temporaryTokenKey = 'temporaryToken';
   static const String mobileCodeKey = 'mobileCode';
@@ -117,11 +118,7 @@ class AppStorage {
   static const String isSmsVerifiedKey = 'isSmsVerified';
   static const String kycStatusKey = 'isKycStatus';
 
-
-
   static Future<void> save({
-
-    /// 2
     String? token,
     String? temporaryToken,
     String? mobileCode,
@@ -132,10 +129,7 @@ class AppStorage {
     bool? isKycVerified,
     bool? isSmsVerified,
     bool? isKycStatus,
-
   }) async {
-
-    /// 3
     if (token != null) await _storage.write(tokenKey, token);
     if (temporaryToken != null) await _storage.write(temporaryTokenKey, temporaryToken);
     if (mobileCode != null) await _storage.write(mobileCodeKey, mobileCode);
@@ -146,10 +140,8 @@ class AppStorage {
     if (isKycVerified != null) await _storage.write(isKycVerifiedKey, isKycVerified);
     if (isSmsVerified != null) await _storage.write(isSmsVerifiedKey, isSmsVerified);
     if (isKycStatus != null) await _storage.write(kycStatusKey, isKycStatus);
-
   }
 
-  /// 4
   static String get token => _storage.read(tokenKey) ?? '';
   static String get temporaryToken => _storage.read(temporaryTokenKey) ?? '';
   static String get mobileCode => _storage.read(mobileCodeKey) ?? '';
@@ -160,12 +152,6 @@ class AppStorage {
   static bool get isEmailVerified => _storage.read(isEmailVerifiedKey) ?? false;
   static bool get isSmsVerified => _storage.read(isSmsVerifiedKey) ?? false;
   static bool get isKycStatus => _storage.read(kycStatusKey) ?? false;
-
-
-
-
-  /// FOR USE WITH ALL COMMON
-  /// final common =  AppStorage.common
 
   static AppStorageModel get common {
     return AppStorageModel(
@@ -182,14 +168,12 @@ class AppStorage {
     );
   }
 }
-
 EOF
 
-echo "✅ AppStorage  Dart code successfull"
+echo "✅ app_storage.dart created"
 
-echo "✅ Writing AppStorageModel  Dart code..."
-
-cat <<"EOF" > "$BASE_DIR/core/core/utils/app_storage_model.dart"
+# Write app_storage_model.dart file
+cat > "$BASE_DIR/core/core/utils/app_storage_model.dart" <<EOF
 class AppStorageModel {
   final String token;
   final String temporaryToken;
@@ -215,8 +199,8 @@ class AppStorageModel {
     required this.mobileCode,
   });
 }
-
 EOF
 
-echo "✅ AppStorageModel  Dart code successfull"
+echo "✅ app_storage_model.dart created"
 
+echo "🚀 All files and structure created successfully!"
