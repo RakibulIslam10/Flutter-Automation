@@ -1,16 +1,20 @@
-# Ensure main view file has auto-generated comment section
-if ! grep -q "// 🌟 Auto-generated part files" "$main_view_file"; then
-  echo -e "\n// 🌟 Auto-generated part files" >> "$main_view_file"
+view_dir="lib/views/$viewName"
+widget_dir="$view_dir/widget"
+main_view_file="$view_dir/screen/${viewName}_screen.dart"
+
+# চেক স্ক্রীন ফাইল আছে কিনা
+if [ ! -f "$main_view_file" ]; then
+  echo "❌ Main screen file $main_view_file found na! স্ক্রিপ্ট বন্ধ।"
+  exit 1
 fi
 
-# Loop through widget names
 for widgetName in "$@"; do
   file="$widget_dir/${widgetName}.dart"
   className=$(to_pascal_case "$widgetName")
 
   echo "🧱 Generating widget: $widgetName → class $className"
 
-  # Create widget file with part of directive
+  # উইজেট ফাইল তৈরি (overwrite করে)
   cat <<EOF > "$file"
 part of '../screen/${viewName}_screen.dart';
 
@@ -26,9 +30,12 @@ class ${className} extends StatelessWidget {
 }
 EOF
 
-  # Add part directive to main view screen if not already present
+  # main screen এ part লাইন যোগ করো যদি না থাকে
   part_line="part 'widget/${widgetName}.dart';"
   if ! grep -Fxq "$part_line" "$main_view_file"; then
     echo "$part_line" >> "$main_view_file"
+    echo "✅ Added part directive for $widgetName"
   fi
 done
+
+echo "✅ Widgets generated and linked successfully!"
