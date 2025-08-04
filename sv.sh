@@ -55,6 +55,16 @@ import '../../../core/utils/dimensions.dart';
 import '../controller/${viewName}_controller.dart';
 
 part '${viewName}_screen_mobile.dart';
+EOF
+
+  # 🔧 Add part lines for each widget file (if any exist)
+  for widgetPath in "$base_dir/widget/"*.dart; do
+    widgetFileName=$(basename "$widgetPath")
+    echo "part '../widget/$widgetFileName';" >> "$base_dir/screen/${viewName}_screen.dart"
+  done
+
+  # 🔚 Append class definition to screen.dart
+  cat <<EOF >> "$base_dir/screen/${viewName}_screen.dart"
 
 class ${capitalizedViewName}Screen extends GetView<${capitalizedViewName}Controller> {
   const ${capitalizedViewName}Screen({super.key});
@@ -85,19 +95,16 @@ EOF
   route_const="  static const $route_name = '/$route_name';"
   grep -qxF "$route_const" "$route_file" || sed -i "/static var list = RoutePageList.list;/a $route_const" "$route_file"
 
-
   # 📥 Add GetPage to pages.dart
   page_file="lib/routes/pages.dart"
   screen_import="import '../views/$viewName/screen/${viewName}_screen.dart';"
   binding_import="import '../bind/${viewName}_binding.dart';"
 
-  # Import if not already present
   grep -qxF "$screen_import" "$page_file" || sed -i "/^import/a $screen_import" "$page_file"
   grep -qxF "$binding_import" "$page_file" || sed -i "/^import/a $binding_import" "$page_file"
 
-  # 📌 Insert GetPage route
   route_code="    GetPage(\n    name: Routes.$viewName,\n    page: () => const ${capitalizedViewName}Screen(),\n    binding: ${capitalizedViewName}Binding(),\n  ),"
   sed -i "/\/\/Page Route List/a $route_code" "$page_file"
 
-  echo "✅ View '$viewName' created with clean structure, route, and binding"
+  echo "✅ View '$viewName' created with clean structure, route, binding, and widget part links"
 done
