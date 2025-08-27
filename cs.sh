@@ -64,11 +64,12 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'core/helpers/network_controller.dart';
 import 'core/utils/basic_import.dart';
+import 'initial.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Initial.init();
-  Get.put(NetworkController());
+ // Get.put(NetworkController());
 
   SystemChrome.setSystemUIOverlayStyle(
     SystemUiOverlayStyle(
