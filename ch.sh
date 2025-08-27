@@ -116,7 +116,7 @@ echo "✅ helpers.dart created"
 
 # network_controller.dart
 cat > "$BASE_DIR/core/helpers/network_controller.dart" <<EOF
-import '../utils/basic_import.dart';
+*/import '../utils/basic_import.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 class NetworkController extends GetxController {
@@ -151,7 +151,7 @@ class NetworkController extends GetxController {
       }
     }
   }
-}
+}/*
 EOF
 
 echo "✅ network_controller.dart created"
