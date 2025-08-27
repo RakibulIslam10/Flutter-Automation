@@ -2,28 +2,27 @@
 
 echo "=== Firebase Flutter Setup Automation ==="
 
+# --- Check Node.js & npm ---
+if ! command -v node &> /dev/null || ! command -v npm &> /dev/null; then
+    echo "Node.js/npm not found! Installing Node.js..."
+    curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+    sudo apt-get install -y nodejs
+fi
+
 # --- Check Firebase CLI ---
-if ! command -v firebase &> /dev/null
-then
-    echo "Firebase CLI not found! Installing..."
-    # Install Firebase CLI via npm
-    if ! command -v npm &> /dev/null
-    then
-        echo "npm not found! Installing Node.js first..."
-        # Install Node.js (Ubuntu/Debian)
-        curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
-        sudo apt-get install -y nodejs
-    fi
+if ! command -v firebase &> /dev/null; then
+    echo "Installing Firebase CLI..."
     sudo npm install -g firebase-tools
-    echo "Firebase CLI installed successfully!"
 fi
 
 # --- Check FlutterFire CLI ---
-if ! command -v flutterfire &> /dev/null
-then
-    echo "FlutterFire CLI not found! Installing..."
+if ! command -v flutterfire &> /dev/null; then
+    echo "Installing FlutterFire CLI..."
     dart pub global activate flutterfire_cli
 fi
+
+# --- Ensure flutterfire command is in PATH ---
+export PATH="$PATH:$HOME/.pub-cache/bin"
 
 # --- User Input ---
 read -p "Enter your Firebase project ID: " FIREBASE_PROJECT_ID
