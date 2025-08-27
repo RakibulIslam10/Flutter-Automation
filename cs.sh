@@ -173,14 +173,4 @@ class OnboardScreenMobile extends GetView<OnboardController> {
   }
 }
 EOF
-
-# --- External scripts
-
-echo -e "${CYAN}📥 Installing Dependencies...${NC}"
-curl -sSL https://raw.githubusercontent.com/RakibulIslam10/Structure-Auto/main/py.sh | bash
-
-echo -e "${CYAN}✏️ Writing Code In Your Structure...${NC}"
-curl -sSL https://raw.githubusercontent.com/RakibulIslam10/Flutter-Automation/main/cu.sh | bash
-curl -sSL https://raw.githubusercontent.com/RakibulIslam10/Flutter-Automation/main/ch.sh | bash
-
 echo -e "${GREEN}✅ Your Flutter project structure was created successfully!${NC}"
