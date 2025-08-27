@@ -46,19 +46,29 @@ read -p "Enter your iOS bundle ID (leave empty if none): " IOS_BUNDLE_ID
 echo "Please login to Firebase (browser will open)..."
 firebase login
 
-# --- Select project ---
-firebase use "$FIREBASE_PROJECT_ID"
+# --- Initialize Firebase project in current folder if needed ---
+if [ ! -f "firebase.json" ]; then
+    echo "Initializing Firebase project in this folder..."
+    firebase init --project "$FIREBASE_PROJECT_ID" --force
+fi
 
 # --- Configure Android ---
 if [ ! -z "$ANDROID_APP_ID" ]; then
     echo "Configuring Android..."
-    flutterfire configure --project "$FIREBASE_PROJECT_ID" --android-package "$ANDROID_APP_ID" --out lib/firebase_options.dart
+    flutterfire configure \
+        --project "$FIREBASE_PROJECT_ID" \
+        --android-package-name "$ANDROID_APP_ID" \
+        --out lib/firebase_options.dart
 fi
 
 # --- Configure iOS ---
 if [ ! -z "$IOS_BUNDLE_ID" ]; then
     echo "Configuring iOS..."
-    flutterfire configure --project "$FIREBASE_PROJECT_ID" --ios-bundle-id "$IOS_BUNDLE_ID" --out lib/firebase_options.dart
+    flutterfire configure \
+        --project "$FIREBASE_PROJECT_ID" \
+        --ios-bundle-id "$IOS_BUNDLE_ID" \
+        --out lib/firebase_options.dart
 fi
 
 echo "✅ Firebase setup completed successfully!"
+echo "Import 'lib/firebase_options.dart' in your main.dart and initialize Firebase."
