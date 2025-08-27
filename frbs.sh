@@ -71,4 +71,24 @@ if [ ! -z "$IOS_BUNDLE_ID" ]; then
 fi
 
 echo "✅ Firebase setup completed successfully!"
-echo "Import 'lib/firebase_options.dart' in your main.dart and initialize Firebase."
+
+
+echo ""
+echo "✅ Firebase setup completed successfully!"
+echo ""
+echo "📌 NEXT STEP: Add the following code at the top of your main.dart to initialize Firebase:"
+echo ""
+echo "import 'package:firebase_core/firebase_core.dart';"
+echo "import 'firebase_options.dart';"
+echo ""
+echo "void main() async {"
+echo "  WidgetsFlutterBinding.ensureInitialized();"
+echo "  await Firebase.initializeApp("
+echo "    options: DefaultFirebaseOptions.currentPlatform,"
+echo "  );"
+echo "  runApp(const MyApp());"
+echo "}"
+echo ""
+echo "➡️  Copy the above code into your main.dart, replacing the old main() if exists."
+echo ""
+echo "✅ Your Flutter project is now ready with Firebase!"
