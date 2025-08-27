@@ -58,11 +58,6 @@ touch "$BASE_DIR"/{main.dart,initial.dart}
 # ---------------- main.dart
 echo -e "${YELLOW}📄 Writing main.dart ...${NC}"
 cat <<EOF > "$BASE_DIR/main.dart"
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
-import 'core/helpers/network_controller.dart';
 import 'core/utils/basic_import.dart';
 import 'initial.dart';
 
