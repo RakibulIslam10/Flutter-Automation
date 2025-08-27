@@ -15,6 +15,80 @@ for viewName in "$@"; do
   mkdir -p "$base_dir/widget"
   mkdir -p "lib/bind"
 
+  # 🎯 Controller File
+  cat <<EOF > "$base_dir/controller/${viewName}_controller.dart"
+import 'package:get/get.dart';
+
+class ${capitalizedViewName}Controller extends GetxController {
+  // TODO: Logic 
+}
+EOF
+
+  # 📱 Mobile Screen File
+  cat <<EOF > "$base_dir/screen/${viewName}_screen_mobile.dart"
+part of '${viewName}_screen.dart';
+
+class ${capitalizedViewName}ScreenMobile extends GetView<${capitalizedViewName}Controller> {
+  const ${capitalizedViewName}ScreenMobile({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: ListView(
+          padding: Dimensions.defaultHorizontalSize.edgeHorizontal,
+          children: [
+            
+          ],
+        ),
+      ),
+    );
+  }
+}
+EOF
+
+  # 🧩 Main Screen File
+  cat <<EOF > "$base_dir/screen/${viewName}_screen.dart"
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import '../../../core/utils/dimensions.dart';
+import '../controller/${viewName}_controller.dart';
+
+part '${viewName}_screen_mobile.dart';
+EOF
+
+  # 🔧 Add part lines for each widget file (if any exist)
+  for widgetPath in "$base_dir/widget/"*.dart; do
+    widgetFileName=$(basename "$widgetPath")
+    echo "part '../widget/$widgetFileName';" >> "$base_dir/screen/${viewName}_screen.dart"
+  done
+
+  # 🔚 Append class definition to screen.dart
+  cat <<EOF >> "$base_dir/screen/${viewName}_screen.dart"
+
+class ${capitalizedViewName}Screen extends GetView<${capitalizedViewName}Controller> {
+  const ${capitalizedViewName}Screen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Layout(mobile: ${capitalizedViewName}ScreenMobile());
+  }
+}
+EOF
+
+  # 🔗 Binding File
+  cat <<EOF > "lib/bind/${viewName}_binding.dart"
+import 'package:get/get.dart';
+import '../views/$viewName/controller/${viewName}_controller.dart';
+
+class ${capitalizedViewName}Binding extends Bindings {
+  @override
+  void dependencies() {
+    Get.lazyPut<${capitalizedViewName}Controller>(() => ${capitalizedViewName}Controller());
+  }
+}
+EOF
+
   # 🛤️ Add route constant to routes.dart
   route_file="lib/routes/routes.dart"
   route_name="${viewName}Screen"
