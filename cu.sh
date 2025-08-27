@@ -20,7 +20,6 @@ export 'package:flutter/services.dart';
 export 'package:flutter_screenutil/flutter_screenutil.dart';
 export 'package:starting/initial.dart';
 export 'package:starting/routes/routes.dart';
-export 'package:starting/views/splash/controller/splash_controller.dart';
 export 'dart:convert';
 export 'package:starting/widgets/text_widget.dart';
 export 'package:starting/core/utils/space.dart';
