@@ -2,50 +2,62 @@
 
 echo "=== Firebase Flutter Setup Automation ==="
 
-# --- Check Node.js & npm ---
-if ! command -v node &> /dev/null || ! command -v npm &> /dev/null; then
+# --- Function: check command existence ---
+check_command() {
+    if ! command -v $1 &> /dev/null; then
+        return 1
+    else
+        return 0
+    fi
+}
+
+# --- Node.js / npm install ---
+if ! check_command node || ! check_command npm; then
     echo "Node.js/npm not found! Installing Node.js..."
+    read -p "Press ENTER to continue installation..."
     curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
     sudo apt-get install -y nodejs
 fi
 
-# --- Check Firebase CLI ---
-if ! command -v firebase &> /dev/null; then
-    echo "Installing Firebase CLI..."
+# --- Firebase CLI install ---
+if ! check_command firebase; then
+    echo "Firebase CLI not found! Installing..."
+    read -p "Press ENTER to install Firebase CLI via npm..."
     sudo npm install -g firebase-tools
 fi
 
-# --- Check FlutterFire CLI ---
-if ! command -v flutterfire &> /dev/null; then
-    echo "Installing FlutterFire CLI..."
+# --- FlutterFire CLI install ---
+if ! check_command flutterfire; then
+    echo "FlutterFire CLI not found! Installing..."
+    read -p "Press ENTER to install FlutterFire CLI via dart..."
     dart pub global activate flutterfire_cli
 fi
 
-# --- Ensure flutterfire command is in PATH ---
+# --- Ensure flutterfire in PATH ---
 export PATH="$PATH:$HOME/.pub-cache/bin"
+echo "PATH updated to include FlutterFire CLI."
 
-# --- User Input ---
+# --- User Inputs ---
 read -p "Enter your Firebase project ID: " FIREBASE_PROJECT_ID
-read -p "Enter your iOS bundle ID (leave empty if not iOS): " IOS_BUNDLE_ID
-read -p "Enter your Android applicationId (leave empty if not Android): " ANDROID_APP_ID
+read -p "Enter your Android applicationId (leave empty if none): " ANDROID_APP_ID
+read -p "Enter your iOS bundle ID (leave empty if none): " IOS_BUNDLE_ID
 
 # --- Firebase login ---
-echo "Logging into Firebase..."
+echo "Please login to Firebase (browser will open)..."
 firebase login
 
-# --- Select Firebase project ---
-echo "Selecting Firebase project..."
+# --- Select project ---
 firebase use "$FIREBASE_PROJECT_ID"
 
 # --- Configure Android ---
 if [ ! -z "$ANDROID_APP_ID" ]; then
-    echo "Setting up Android..."
+    echo "Configuring Android..."
     flutterfire configure --project "$FIREBASE_PROJECT_ID" --android-package "$ANDROID_APP_ID" --out lib/firebase_options.dart
 fi
 
 # --- Configure iOS ---
 if [ ! -z "$IOS_BUNDLE_ID" ]; then
-    echo "Setting up iOS..."
+    echo "Configuring iOS..."
     flutterfire configure --project "$FIREBASE_PROJECT_ID" --ios-bundle-id "$IOS_BUNDLE_ID" --out lib/firebase_options.dart
 fi
 
