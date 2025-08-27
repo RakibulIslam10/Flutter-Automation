@@ -175,8 +175,6 @@ class OnboardScreenMobile extends GetView<OnboardController> {
 EOF
 
 # --- External scripts
-echo -e "${CYAN}🛠️ Creating API Method...${NC}"
-curl -sSL https://raw.githubusercontent.com/RakibulIslam10/Structure-Auto/main/am.sh | bash
 
 echo -e "${CYAN}📥 Installing Dependencies...${NC}"
 curl -sSL https://raw.githubusercontent.com/RakibulIslam10/Structure-Auto/main/py.sh | bash
