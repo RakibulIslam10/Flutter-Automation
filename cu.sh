@@ -376,4 +376,263 @@ EOF
 
 echo "✅ custom_style.dart created"
 
+
+
+# custom_colors.dart
+cat > "$BASE_DIR/core/themes/custom_colors.dart" <<EOF
+part of 'token.dart';
+
+class CustomColor {
+  //Light Color
+  static Color primary = HexColor('#FFBA00');
+  static Color secondary = HexColor('#6F6F6F');
+  static Color secondaryTextColor = HexColor('#9F9C96');
+  static Color tertiary = HexColor('#F5F5F5');
+  static Color background = HexColor('#171717');
+  static Color typography = HexColor('#1D1D1D');
+  static Color disableColor = HexColor('#BCBCBC');
+
+  //Dark Color
+  static Color primaryDark = HexColor('#007bff');
+  static Color secondaryDark = HexColor('#FC5B3F');
+  static Color tertiaryDark = HexColor('#1D1D1D');
+  static Color backgroundDark = HexColor('#171717');
+  static Color typographyDark = HexColor('#FFFFFF');
+
+  // Status Color
+  static Color ongoing = HexColor('#FFFFFF');
+  static Color pending = HexColor('#FF9E45');
+  static Color saved = HexColor('#2C8CFA');
+  static Color canceled = HexColor('#FFFFFF');
+  static Color selected = HexColor('#27B059');
+  static Color rejected = HexColor('#DC3A3A');
+  static Color bottomNavColor = HexColor('#00000033');
+
+  // Shade Color
+  static CSM typographyShade = CSM(typography.value, typographyShadeToken);
+  static CSM typographyDarkShade = CSM(typography.value, typoDarkShadeToken);
+  static CSM primaryShade = CSM(primary.value, primaryShadeToken);
+
+  // Others
+  static const Color whiteColor = Color(0xffFFFFFF);
+  static const Color blackColor = Color(0xFF000000);
+  static const Color blueColor = Color(0xFF2323FF);
+  static const Color primaryColorShadeZero = Color(0xFFFFF2F0);
+
+  /// SHADE TOKENS (Done)
+  static Map<int, Color> typographyShadeToken = {
+    100: HexColor('#0A0A0A'),
+    90: HexColor('#0D0D0D'),
+    80: HexColor('#111111'),
+    70: HexColor('#161616'),
+    60: HexColor('#171717'),
+    50: HexColor('#1A1A1A'),
+    40: HexColor('#8C8C8C'),
+    30: HexColor('#B9B9B9'),
+    20: HexColor('#DDDDDD'),
+    10: HexColor('#BBBBBB'),
+    5: HexColor('#D2D2D2'),
+    0: HexColor('#E8E8E8'),
+  };
+
+  //( Not Done)
+  static Map<int, Color> typoDarkShadeToken = {
+    100: HexColor('#FFFFFF'),
+    90: HexColor('#0D0D0D'),
+    80: HexColor('#111111'),
+    70: HexColor('#161616'),
+    60: HexColor('#171717'),
+    50: HexColor('#1A1A1A'),
+    40: HexColor('#FFFFFF'),
+    30: HexColor('#B9B9B9'),
+    20: HexColor('#DDDDDD'),
+    10: HexColor('#BBBBBB'),
+    5: HexColor('#D2D2D2'),
+    0: HexColor('#E8E8E8'),
+  };
+
+  static Map<int, Color> primaryShadeToken = {
+    100: HexColor('#FFFFFF'),
+    80: HexColor('#FFFFFF'),
+    70: HexColor('#FFFFFF'),
+    60: HexColor('#FFFFFF'),
+    50: HexColor('#FFFFFF'),
+    40: HexColor('#FFFFFF'),
+    30: HexColor('#FFFFFF'),
+    20: HexColor('#FFFFFF'),
+    10: HexColor('#FFFFFF'),
+    0: HexColor('#FFFFFF'),
+  };
+}
+EOF
+
+echo "✅ custom_colors.dart created"
+
+
+
+
+# model.dart
+cat > "$BASE_DIR/core/themes/model.dart" <<EOF
+import 'package:flutter/material.dart';
+
+/// C color S shade M model
+class CSM extends ColorSwatch<int> {
+  const CSM(super.primary, super.swatch);
+  Color? get full => this[100];
+  Color? get highNinety => this[90];
+  Color? get highEighty => this[80];
+  Color? get highSeventy => this[70];
+  Color? get mediumSixty => this[60];
+  Color? get mediumFifty => this[50];
+  Color? get mediumForty => this[40];
+  Color? get lowThirty => this[30];
+  Color? get lowTwenty => this[20];
+  Color? get lowTen => this[10];
+  Color? get lowFive => this[5];
+  Color? get zero => this[0];
+}
+
+class HexColor extends Color {
+  static int _getColorFromHex(String hexColor) {
+    hexColor = hexColor.toUpperCase().replaceAll("#", "");
+    if (hexColor.length == 6) {
+      hexColor = "FF$hexColor";
+    }
+    return int.parse(hexColor, radix: 16);
+  }
+
+  HexColor(final String hexColor) : super(_getColorFromHex(hexColor));
+}
+EOF
+
+echo "✅ model.dart created"
+
+
+# model.dart
+cat > "$BASE_DIR/core/themes/model.dart" <<EOF
+import 'package:flutter/material.dart';
+
+/// C color S shade M model
+class CSM extends ColorSwatch<int> {
+  const CSM(super.primary, super.swatch);
+  Color? get full => this[100];
+  Color? get highNinety => this[90];
+  Color? get highEighty => this[80];
+  Color? get highSeventy => this[70];
+  Color? get mediumSixty => this[60];
+  Color? get mediumFifty => this[50];
+  Color? get mediumForty => this[40];
+  Color? get lowThirty => this[30];
+  Color? get lowTwenty => this[20];
+  Color? get lowTen => this[10];
+  Color? get lowFive => this[5];
+  Color? get zero => this[0];
+}
+
+class HexColor extends Color {
+  static int _getColorFromHex(String hexColor) {
+    hexColor = hexColor.toUpperCase().replaceAll("#", "");
+    if (hexColor.length == 6) {
+      hexColor = "FF$hexColor";
+    }
+    return int.parse(hexColor, radix: 16);
+  }
+
+  HexColor(final String hexColor) : super(_getColorFromHex(hexColor));
+}
+EOF
+
+echo "✅ model.dart created"
+
+
+
+
+# themes.dart
+cat > "$BASE_DIR/core/themes/themes.dart" <<EOF
+part of 'token.dart';
+
+class Themes {
+  final box = GetStorage();
+  final key = 'isDarkMode';
+
+  void saveTheme(bool isDarkMode) => box.write(key, isDarkMode);
+
+  bool loadTheme() => box.read(key) ?? false;
+
+  ThemeMode get currentTheme => loadTheme() ? ThemeMode.dark : ThemeMode.light;
+
+  void switchTheme() {
+    final newTheme = loadTheme() ? ThemeMode.light : ThemeMode.dark;
+    Get.changeThemeMode(newTheme);
+    saveTheme(!loadTheme());
+  }
+
+  static final light = lightThemeData;
+  static final dark = darkThemeData;
+}
+EOF
+
+echo "✅ themes.dart created"
+
+
+
+# token.dart
+cat > "$BASE_DIR/core/themes/token.dart" <<EOF
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import 'model.dart';
+
+part 'custom_colors.dart';
+
+part 'themes.dart';
+
+// LIGHT THEME DATA - - - - - - - - - - - - - - - - -
+
+final ThemeData lightThemeData = ThemeData.light().copyWith(
+  primaryColor: CustomColor.primary,
+  dividerColor: Colors.transparent,
+  colorScheme: ColorScheme.light(tertiary: CustomColor.tertiary),
+  scaffoldBackgroundColor: CustomColor.background,
+  appBarTheme: AppBarTheme(systemOverlayStyle: SystemUiOverlayStyle.light),
+  textTheme: ThemeData.light().textTheme.apply(
+    // fontFamily: GoogleFonts.montserrat().fontFamily,
+  ),
+  elevatedButtonTheme: ElevatedButtonThemeData(
+    style: ElevatedButton.styleFrom(
+      surfaceTintColor: Colors.transparent,
+      shadowColor: Colors.transparent,
+      backgroundColor: CustomColor.primary,
+      side: BorderSide(color: CustomColor.primary),
+    ),
+  ),
+);
+
+// DARK THEME DATA - - - - - - - - - - - - - - - - -
+
+final ThemeData darkThemeData = ThemeData.dark().copyWith(
+  primaryColor: CustomColor.primaryDark,
+  colorScheme: ColorScheme.dark(surface: CustomColor.tertiaryDark),
+  scaffoldBackgroundColor: CustomColor.backgroundDark,
+  brightness: Brightness.dark,
+  textTheme: ThemeData.dark().textTheme.apply(
+    // fontFamily: GoogleFonts.inter().fontFamily,
+  ),
+  elevatedButtonTheme: ElevatedButtonThemeData(
+    style: ElevatedButton.styleFrom(
+      surfaceTintColor: Colors.transparent,
+      shadowColor: Colors.transparent,
+      backgroundColor: CustomColor.primary,
+      side: BorderSide(color: CustomColor.primary),
+    ),
+  ),
+);
+}
+EOF
+
+echo "✅ token.dart created"
+
+
+
 echo "🚀 All files and structure created successfully!"
