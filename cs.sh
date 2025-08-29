@@ -13,7 +13,6 @@ echo -e "${CYAN}📁 Creating Your Custom Structure ...${NC}"
 
 # --- Bindings folder
 mkdir -p "$BASE_DIR/bind"
-mkdir -p "$BASE_DIR/views"
 
 # --- Core folders
 mkdir -p "$BASE_DIR/core"/{api,helpers,languages,themes,utils}
@@ -32,6 +31,7 @@ touch "$BASE_DIR/res/assets.dart"
 # --- Routes
 mkdir -p "$BASE_DIR/routes"
 touch "$BASE_DIR/routes"/{pages.dart,routes.dart}
+mkdir -p "$BASE_DIR/views"
 
 # --- Main entry files
 touch "$BASE_DIR"/{main.dart,initial.dart}
