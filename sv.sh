@@ -53,7 +53,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/utils/dimensions.dart';
 import '../controller/${viewName}_controller.dart';
-
+import '../../../core/utils/layout.dart';
 part '${viewName}_screen_mobile.dart';
 EOF
 
