@@ -13,6 +13,7 @@ echo -e "${CYAN}📁 Creating Your Custom Structure ...${NC}"
 
 # --- Bindings folder
 mkdir -p "$BASE_DIR/bind"
+mkdir -p "$BASE_DIR/views"
 
 # --- Core folders
 mkdir -p "$BASE_DIR/core"/{api,helpers,languages,themes,utils}
