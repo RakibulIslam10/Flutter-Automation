@@ -22,12 +22,12 @@ export 'package:get_storage/get_storage.dart';
 
 
 // add those widgets
-export '../themes/token.dart';
-export '../languages/strings.dart';
-export 'package:starting/routes/routes.dart';
-export 'package:starting/widgets/text_widget.dart';
-export 'package:starting/core/utils/space.dart';
-export 'package:starting/widgets/custom_snackbar.dart';
+// export '../themes/token.dart';
+// export '../languages/strings.dart';
+// export 'package:starting/routes/routes.dart';
+// export 'package:starting/widgets/text_widget.dart';
+// export 'package:starting/core/utils/space.dart';
+// export 'package:starting/widgets/custom_snackbar.dart';
 
 EOF
 
