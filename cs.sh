@@ -6,7 +6,8 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
-
+BASE_DIR="assets"
+mkdir -p "$BASE_DIR/assets"/{icons,logo,dummy}
 BASE_DIR="lib"
 
 echo -e "${CYAN}📁 Creating Your Custom Structure ...${NC}"
