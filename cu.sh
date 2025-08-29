@@ -380,7 +380,7 @@ echo "✅ custom_style.dart created"
 
 
 # strings.dart
-cat > "$BASE_DIR/core/themes/strings.dart" <<EOF
+cat > "$BASE_DIR/core/languages/strings.dart" <<EOF
 class Strings {
   static String appName = "";
   static const String error = "Error";
@@ -656,7 +656,7 @@ final ThemeData darkThemeData = ThemeData.dark().copyWith(
     ),
   ),
 );
-}
+
 EOF
 
 echo "✅ token.dart created"
