@@ -404,6 +404,35 @@ EOF
 echo "✅ strings.dart created"
 
 
+# pages.dart
+cat > "$BASE_DIR/routes/pages.dart" <<EOF
+part of 'routes.dart';
+
+class RoutePageList {
+  static var list = [
+    //Page Route List
+
+  ];
+}
+
+EOF
+
+echo "✅ pages.dart created"
+
+
+
+
+# Routes.dart
+cat > "$BASE_DIR/routes/routes.dart" <<EOF
+part 'pages.dart';
+
+class Routes {
+  static var list = RoutePageList.list;
+
+}
+EOF
+
+echo "✅ Routes.dart created"
 
 
 # custom_colors.dart
