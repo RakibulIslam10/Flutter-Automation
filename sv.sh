@@ -59,8 +59,9 @@ EOF
 
   # 🔧 Add part lines for each widget file (if any exist)
   for widgetPath in "$base_dir/widget/"*.dart; do
-    widgetFileName=$(basename "$widgetPath")
-    echo "part '../widget/$widgetFileName';" >> "$base_dir/screen/${viewName}_screen.dart"
+    [ -e "\$widgetPath" ] || continue
+    widgetFileName=\$(basename "\$widgetPath")
+    echo "part '../widget/\$widgetFileName';" >> "$base_dir/screen/${viewName}_screen.dart"
   done
 
   # 🔚 Append class definition to screen.dart
@@ -92,19 +93,19 @@ EOF
   # 🛤️ Add route constant to routes.dart
   route_file="lib/routes/routes.dart"
   route_name="${viewName}Screen"
-  route_const="  static const $route_name = '/$route_name';"
-  grep -qxF "$route_const" "$route_file" || sed -i "/static var list = RoutePageList.list;/a $route_const" "$route_file"
+  route_const="  static const \$route_name = '/\$route_name';"
+  grep -qxF "\$route_const" "\$route_file" || sed -i "/static var list = RoutePageList.list;/a \$route_const" "\$route_file"
 
   # 📥 Add GetPage to pages.dart
   page_file="lib/routes/pages.dart"
   screen_import="import '../views/$viewName/screen/${viewName}_screen.dart';"
   binding_import="import '../bind/${viewName}_binding.dart';"
 
-  grep -qxF "$screen_import" "$page_file" || sed -i "/^import/a $screen_import" "$page_file"
-  grep -qxF "$binding_import" "$page_file" || sed -i "/^import/a $binding_import" "$page_file"
+  grep -qxF "\$screen_import" "\$page_file" || sed -i "/^import/a \$screen_import" "\$page_file"
+  grep -qxF "\$binding_import" "\$page_file" || sed -i "/^import/a \$binding_import" "\$page_file"
 
-  route_code="    GetPage(\n    name: Routes.$viewName,\n    page: () => const ${capitalizedViewName}Screen(),\n    binding: ${capitalizedViewName}Binding(),\n  ),"
-  sed -i "/\/\/Page Route List/a $route_code" "$page_file"
+  route_code="    GetPage(\n    name: Routes.${viewName}Screen,\n    page: () => const ${capitalizedViewName}Screen(),\n    binding: ${capitalizedViewName}Binding(),\n  ),"
+  sed -i "/\/\/Page Route List/a \$route_code" "\$page_file"
 
   echo "✅ View '$viewName' created with clean structure, route, binding, and widget part links"
 done
