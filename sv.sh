@@ -3,31 +3,30 @@ set -e
 
 # 🌈 Colors
 GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
 CYAN='\033[0;36m'
-RED='\033[0;31m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
 BASE_DIR="lib"
 
 # Snake_case → PascalCase
 to_pascal_case() {
-  echo "$1" | sed -r 's/(^|_)([a-z])/\U\2/g'
+  IFS=_ read -ra parts <<< "$1"
+  for part in "${parts[@]}"; do
+    printf "%s" "$(tr '[:lower:]' '[:upper:]' <<< "${part:0:1}")${part:1}"
+  done
 }
 
-# Snake_case → camelCase
-to_camel_case() {
-  local input=$(to_pascal_case "$1")
-  echo "$(tr '[:upper:]' '[:lower:]' <<< ${input:0:1})${input:1}"
-}
-
-# ✅ Add GetPage to route_page_list.dart
+# RoutePageList.list এ GetPage auto add
 add_to_route_page_list() {
-  local viewName=$1
-  local pascalName=$2
+  local viewName="$1"
+  local pascalName
+  pascalName=$(to_pascal_case "$viewName")
+
   local routePageListFile="lib/routes/route_page_list.dart"
 
   if [ ! -f "$routePageListFile" ]; then
-    echo -e "${RED}❌ $routePageListFile ফাইল পাওয়া যায়নি!${NC}"
+    echo "❌ $routePageListFile ফাইল নেই!"
     return
   fi
 
@@ -35,41 +34,35 @@ add_to_route_page_list() {
   lineNumber=$(grep -n "//Page Route List" "$routePageListFile" | cut -d: -f1)
 
   if [ -z "$lineNumber" ]; then
-    echo -e "${RED}❌ //Page Route List comment পাওয়া যায়নি!${NC}"
+    echo "❌ //Page Route List comment পাওয়া যায়নি!"
     return
   fi
 
   sed -i "$((lineNumber+1)) i\    GetPage(\n      name: Routes.$viewName,\n      page: () => const ${pascalName}Screen(),\n      binding: ${pascalName}Binding(),\n    ),\n" "$routePageListFile"
 
-  echo -e "${GREEN}✅ $pascalName route এ যুক্ত হয়েছে!${NC}"
+  echo -e "${GREEN}✅ $pascalName GetPage যুক্ত হয়েছে RoutePageList.list এ${NC}"
 }
 
-# ✅ Generate Views
+# Views generate
 generate_views() {
   echo -ne "${CYAN}📥 Enter View Names (space-separated): ${NC}"
   read -r viewNames
 
   for viewName in $viewNames; do
     pascalName=$(to_pascal_case "$viewName")
-    camelName=$(to_camel_case "$viewName")
 
-    viewDir="$BASE_DIR/views/$viewName"
-    screenDir="$viewDir/screen"
-    widgetDir="$viewDir/widget"
-    controllerDir="$viewDir/controller"
-    bindDir="lib/bind"
+    # Folder structure
+    mkdir -p "$BASE_DIR/views/$viewName/screen"
+    mkdir -p "$BASE_DIR/views/$viewName/widget"
+    mkdir -p "$BASE_DIR/views/$viewName/controller"
+    mkdir -p "$BASE_DIR/bind"
 
-    mkdir -p "$screenDir" "$widgetDir" "$controllerDir" "$bindDir"
-
-    # Screen file
-    screenFile="$screenDir/${viewName}_screen.dart"
-    if [ ! -f "$screenFile" ]; then
-      cat > "$screenFile" <<EOF
+    # Screen
+    cat > "$BASE_DIR/views/$viewName/screen/${viewName}_screen.dart" <<EOF
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../core/utils/dimensions.dart';
-import '../controller/${viewName}_controller.dart';
 import '../../../core/utils/layout.dart';
+import '../controller/${viewName}_controller.dart';
 part '../widget/${viewName}_widget.dart';
 
 class ${pascalName}Screen extends GetView<${pascalName}Controller> {
@@ -77,51 +70,24 @@ class ${pascalName}Screen extends GetView<${pascalName}Controller> {
 
   @override
   Widget build(BuildContext context) {
-    return Layout(mobile: ${pascalName}Widget());
-  }
-}
-EOF
-      echo -e "${GREEN}✅ $screenFile তৈরি হয়েছে${NC}"
-    fi
-
-    # Widget file
-    widgetFile="$widgetDir/${viewName}_widget.dart"
-    if [ ! -f "$widgetFile" ]; then
-      cat > "$widgetFile" <<EOF
-part of '../screen/${viewName}_screen.dart';
-
-class ${pascalName}Widget extends StatelessWidget {
-  const ${pascalName}Widget({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("$pascalName")),
-      body: Center(child: Text("$pascalName Screen")),
+    return const Layout(
+      mobile: Scaffold(
+        body: Center(child: Text('$pascalName Screen')),
+      ),
     );
   }
 }
 EOF
-      echo -e "${GREEN}✅ $widgetFile তৈরি হয়েছে${NC}"
-    fi
 
-    # Controller file
-    controllerFile="$controllerDir/${viewName}_controller.dart"
-    if [ ! -f "$controllerFile" ]; then
-      cat > "$controllerFile" <<EOF
+    # Controller
+    cat > "$BASE_DIR/views/$viewName/controller/${viewName}_controller.dart" <<EOF
 import 'package:get/get.dart';
 
-class ${pascalName}Controller extends GetxController {
-  // Controller Logic
-}
+class ${pascalName}Controller extends GetxController {}
 EOF
-      echo -e "${GREEN}✅ $controllerFile তৈরি হয়েছে${NC}"
-    fi
 
-    # Binding file
-    bindingFile="$bindDir/${viewName}_binding.dart"
-    if [ ! -f "$bindingFile" ]; then
-      cat > "$bindingFile" <<EOF
+    # Binding
+    cat > "$BASE_DIR/bind/${viewName}_binding.dart" <<EOF
 import 'package:get/get.dart';
 import '../views/$viewName/controller/${viewName}_controller.dart';
 
@@ -132,20 +98,33 @@ class ${pascalName}Binding extends Bindings {
   }
 }
 EOF
-      echo -e "${GREEN}✅ $bindingFile তৈরি হয়েছে${NC}"
-    fi
 
-    # Add Route
-    add_to_route_page_list "$viewName" "$pascalName"
+    # Widget
+    cat > "$BASE_DIR/views/$viewName/widget/${viewName}_widget.dart" <<EOF
+part of '../screen/${viewName}_screen.dart';
+
+class ${pascalName}Widget extends StatelessWidget {
+  const ${pascalName}Widget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Text('$pascalName Widget');
+  }
+}
+EOF
+
+    # RoutePageList add
+    add_to_route_page_list "$viewName"
+
   done
 }
 
-# ✅ Menu
-case $1 in
+# Main menu
+case "$1" in
   generate-views)
     generate_views
     ;;
   *)
-    echo -e "${CYAN}Usage: ./rakib.sh generate-views${NC}"
+    echo "Usage: ./rakib.sh generate-views"
     ;;
 esac
