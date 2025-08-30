@@ -91,19 +91,16 @@ EOF
   grep -qxF "$route_const" "$route_file" || sed -i "/static var list = RoutePageList.list;/a $route_const" "$route_file"
 
   # 📥 Add GetPage to pages.dart
-  page_file="lib/routes/pages.dart"
-  screen_import="import '../views/$viewName/screen/${viewName}_screen.dart';"
-  binding_import="import '../bind/${viewName}_binding.dart';"
+# 📥 Add GetPage to pages.dart (only the GetPage entry, no imports)
+page_file="lib/routes/pages.dart"
+route_name="${viewName}Screen"
 
-  grep -qxF "$screen_import" "$page_file" || sed -i "/^import/a $screen_import" "$page_file"
-  grep -qxF "$binding_import" "$page_file" || sed -i "/^import/a $binding_import" "$page_file"
-
-  route_code="    GetPage(
+route_code="    GetPage(
       name: Routes.${route_name},
       page: () => const ${capitalizedViewName}Screen(),
       binding: ${capitalizedViewName}Binding(),
     ),"
-  sed -i "/\/\/Page Route List/a $route_code" "$page_file"
+sed -i "/\/\/Page Route List/a $route_code" "$page_file"
 
   echo "✅ View '$viewName' created with clean structure, route, binding, and widget part links"
 done
