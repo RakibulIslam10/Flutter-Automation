@@ -38,6 +38,7 @@ dependencies:
   google_sign_in: ^6.3.0
   get_storage:
   connectivity_plus:
+  country_picker: 
   flutter_svg:
   intl:
   cached_network_image:
