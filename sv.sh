@@ -54,6 +54,7 @@ import 'package:get/get.dart';
 import '../../../core/utils/dimensions.dart';
 import '../controller/${viewName}_controller.dart';
 import '../../../core/utils/layout.dart';
+
 part '${viewName}_screen_mobile.dart';
 EOF
 
@@ -105,11 +106,13 @@ EOF
   grep -qxF "$binding_import" "$page_file" || sed -i "/^import/a $binding_import" "$page_file"
 
   route_code="    GetPage(
-    name: Routes.${viewName}Screen,
-    page: () => const ${capitalizedViewName}Screen(),
-    binding: ${capitalizedViewName}Binding(),
-  ),"
-  sed -i "/\/\/Page Route List/a $route_code" "$page_file"
+      name: Routes.${viewName}Screen,
+      page: () => const ${capitalizedViewName}Screen(),
+      binding: ${capitalizedViewName}Binding(),
+    ),"
+  
+  # 🔑 Insert into static var list inside RoutePageList
+  sed -i "/static var list = \[/a $route_code" "$page_file"
 
-  echo "✅ View '$viewName' created with clean structure, route, binding, and widget part links"
+  echo "✅ View '$viewName' created with clean structure, route, binding, and page entry"
 done
