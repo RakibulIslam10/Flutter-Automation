@@ -4,8 +4,7 @@ PROJECT_NAME=$1
 DESCRIPTION=$2
 
 if [ -z "$PROJECT_NAME" ]; then
-  echo "❌ Please provide a project name."
-  echo "Usage: ./generate_pubspec.sh <project_name> \"<description>\""
+  echo "❌ Project name is required."
   exit 1
 fi
 
@@ -26,7 +25,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
   cupertino_icons: ^1.0.8
   shimmer:
   url_launcher: ^6.3.1
@@ -48,7 +46,6 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
   flutter_lints: ^5.0.0
 
 flutter:
@@ -58,13 +55,6 @@ flutter:
   assets:
     - assets/icons/
     - assets/logo/
-    
-# fonts:
-#   - family: Schyler
-#     fonts:
-#       - asset: fonts/Schyler-Regular.ttf
-#       - asset: fonts/Schyler-Italic.ttf
-#         style: italic
 EOF
 
 echo "✅ pubspec.yaml generated for project '$PROJECT_NAME'"
