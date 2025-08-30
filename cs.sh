@@ -7,10 +7,12 @@ YELLOW='\033[1;33m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 BASE_DIR="lib"
+ASSET_DIR="assets"
 
 echo -e "${CYAN}📁 Creating Your Custom Structure ...${NC}"
 
-mkdir -p "$BASE_DIR/assets"/{icons,logo,dummy}
+mkdir -p "$ASSET_DIR"/{icons,logo,dummy}
+
 
 # --- Bindings folder
 mkdir -p "$BASE_DIR/bind"
