@@ -1,130 +1,110 @@
-#!/usr/bin/env bash
-set -e
+#!/bin/bash
 
-# 🌈 Colors
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-CYAN='\033[0;36m'
-NC='\033[0m'
-
-BASE_DIR="lib"
-
-# Snake_case → PascalCase
-to_pascal_case() {
-  IFS=_ read -ra parts <<< "$1"
-  for part in "${parts[@]}"; do
-    printf "%s" "$(tr '[:lower:]' '[:upper:]' <<< "${part:0:1}")${part:1}"
-  done
+# 🔠 Capitalize first letter
+capitalize() {
+  echo "$1" | awk '{ print toupper(substr($0,1,1)) tolower(substr($0,2)) }'
 }
 
-# RoutePageList.list এ GetPage auto add
-add_to_route_page_list() {
-  local viewName="$1"
-  local pascalName
-  pascalName=$(to_pascal_case "$viewName")
+for viewName in "$@"; do
+  capitalizedViewName=$(capitalize "$viewName")
+  base_dir="lib/views/$viewName"
+  echo "📦 Generating view: $viewName"
 
-  local routePageListFile="lib/routes/route_page_list.dart"
+  mkdir -p "$base_dir/controller"
+  mkdir -p "$base_dir/screen"
+  mkdir -p "$base_dir/widget"
+  mkdir -p "lib/bind"
 
-  if [ ! -f "$routePageListFile" ]; then
-    echo "❌ $routePageListFile ফাইল নেই!"
-    return
-  fi
-
-  local lineNumber
-  lineNumber=$(grep -n "//Page Route List" "$routePageListFile" | cut -d: -f1)
-
-  if [ -z "$lineNumber" ]; then
-    echo "❌ //Page Route List comment পাওয়া যায়নি!"
-    return
-  fi
-
-  sed -i "$((lineNumber+1)) i\    GetPage(\n      name: Routes.$viewName,\n      page: () => const ${pascalName}Screen(),\n      binding: ${pascalName}Binding(),\n    ),\n" "$routePageListFile"
-
-  echo -e "${GREEN}✅ $pascalName GetPage যুক্ত হয়েছে RoutePageList.list এ${NC}"
-}
-
-# Views generate
-generate_views() {
-  echo -ne "${CYAN}📥 Enter View Names (space-separated): ${NC}"
-  read -r viewNames
-
-  for viewName in $viewNames; do
-    pascalName=$(to_pascal_case "$viewName")
-
-    # Folder structure
-    mkdir -p "$BASE_DIR/views/$viewName/screen"
-    mkdir -p "$BASE_DIR/views/$viewName/widget"
-    mkdir -p "$BASE_DIR/views/$viewName/controller"
-    mkdir -p "$BASE_DIR/bind"
-
-    # Screen
-    cat > "$BASE_DIR/views/$viewName/screen/${viewName}_screen.dart" <<EOF
-import 'package:flutter/material.dart';
+  # 🎯 Controller File
+  cat <<EOF > "$base_dir/controller/${viewName}_controller.dart"
 import 'package:get/get.dart';
-import '../../../core/utils/layout.dart';
-import '../controller/${viewName}_controller.dart';
-part '../widget/${viewName}_widget.dart';
 
-class ${pascalName}Screen extends GetView<${pascalName}Controller> {
-  const ${pascalName}Screen({super.key});
+class ${capitalizedViewName}Controller extends GetxController {
+  // TODO: Logic 
+}
+EOF
+
+  # 📱 Mobile Screen File
+  cat <<EOF > "$base_dir/screen/${viewName}_screen_mobile.dart"
+part of '${viewName}_screen.dart';
+
+class ${capitalizedViewName}ScreenMobile extends GetView<${capitalizedViewName}Controller> {
+  const ${capitalizedViewName}ScreenMobile({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const Layout(
-      mobile: Scaffold(
-        body: Center(child: Text('$pascalName Screen')),
+    return Scaffold(
+      body: SafeArea(
+        child: ListView(
+          padding: Dimensions.defaultHorizontalSize.edgeHorizontal,
+          children: [
+            
+          ],
+        ),
       ),
     );
   }
 }
 EOF
 
-    # Controller
-    cat > "$BASE_DIR/views/$viewName/controller/${viewName}_controller.dart" <<EOF
+  # 🧩 Main Screen File
+  cat <<EOF > "$base_dir/screen/${viewName}_screen.dart"
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../core/utils/dimensions.dart';
+import '../controller/${viewName}_controller.dart';
 
-class ${pascalName}Controller extends GetxController {}
+part '${viewName}_screen_mobile.dart';
 EOF
 
-    # Binding
-    cat > "$BASE_DIR/bind/${viewName}_binding.dart" <<EOF
-import 'package:get/get.dart';
-import '../views/$viewName/controller/${viewName}_controller.dart';
+  # 🔧 Add part lines for each widget file (if any exist)
+  for widgetPath in "$base_dir/widget/"*.dart; do
+    widgetFileName=$(basename "$widgetPath")
+    echo "part '../widget/$widgetFileName';" >> "$base_dir/screen/${viewName}_screen.dart"
+  done
 
-class ${pascalName}Binding extends Bindings {
-  @override
-  void dependencies() {
-    Get.lazyPut<${pascalName}Controller>(() => ${pascalName}Controller());
-  }
-}
-EOF
+  # 🔚 Append class definition to screen.dart
+  cat <<EOF >> "$base_dir/screen/${viewName}_screen.dart"
 
-    # Widget
-    cat > "$BASE_DIR/views/$viewName/widget/${viewName}_widget.dart" <<EOF
-part of '../screen/${viewName}_screen.dart';
-
-class ${pascalName}Widget extends StatelessWidget {
-  const ${pascalName}Widget({super.key});
+class ${capitalizedViewName}Screen extends GetView<${capitalizedViewName}Controller> {
+  const ${capitalizedViewName}Screen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const Text('$pascalName Widget');
+    return Layout(mobile: ${capitalizedViewName}ScreenMobile());
   }
 }
 EOF
 
-    # RoutePageList add
-    add_to_route_page_list "$viewName"
+  # 🔗 Binding File
+  cat <<EOF > "lib/bind/${viewName}_binding.dart"
+import 'package:get/get.dart';
+import '../views/$viewName/controller/${viewName}_controller.dart';
 
-  done
+class ${capitalizedViewName}Binding extends Bindings {
+  @override
+  void dependencies() {
+    Get.lazyPut<${capitalizedViewName}Controller>(() => ${capitalizedViewName}Controller());
+  }
 }
+EOF
 
-# Main menu
-case "$1" in
-  generate-views)
-    generate_views
-    ;;
-  *)
-    echo "Usage: ./rakib.sh generate-views"
-    ;;
-esac
+  # 🛤️ Add route constant to routes.dart
+  route_file="lib/routes/routes.dart"
+  route_name="${viewName}Screen"
+  route_const="  static const $route_name = '/$route_name';"
+  grep -qxF "$route_const" "$route_file" || sed -i "/static var list = RoutePageList.list;/a $route_const" "$route_file"
+
+  # 📥 Add GetPage to pages.dart
+  page_file="lib/routes/pages.dart"
+  screen_import="import '../views/$viewName/screen/${viewName}_screen.dart';"
+  binding_import="import '../bind/${viewName}_binding.dart';"
+
+  grep -qxF "$screen_import" "$page_file" || sed -i "/^import/a $screen_import" "$page_file"
+  grep -qxF "$binding_import" "$page_file" || sed -i "/^import/a $binding_import" "$page_file"
+
+  route_code="    GetPage(\n    name: Routes.$viewName,\n    page: () => const ${capitalizedViewName}Screen(),\n    binding: ${capitalizedViewName}Binding(),\n  ),"
+  sed -i "/\/\/Page Route List/a $route_code" "$page_file"
+
+  echo "✅ View '$viewName' created with clean structure, route, binding, and widget part links"
+done
