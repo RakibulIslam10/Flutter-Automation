@@ -38,16 +38,19 @@ dependencies:
   google_sign_in: ^6.3.0
   get_storage:
   connectivity_plus:
-  country_picker: 
   flutter_svg:
   intl:
   cached_network_image:
+  country_picker: ^2.0.27
+
   http:
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
+  build_runner:
+  flutter_gen_runner:
 
 flutter:
 
@@ -56,6 +59,7 @@ flutter:
   assets:
     - assets/icons/
     - assets/logo/
+    - assets/dummy/
 EOF
 
 echo "✅ pubspec.yaml generated for project '$PROJECT_NAME'"
