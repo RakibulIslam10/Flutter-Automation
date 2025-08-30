@@ -110,9 +110,9 @@ EOF
       page: () => const ${capitalizedViewName}Screen(),
       binding: ${capitalizedViewName}Binding(),
     ),"
-  
-  # 🔑 Insert into static var list inside RoutePageList
-  sed -i "/static var list = \[/a $route_code" "$page_file"
+
+  # 🔑 Insert into //Page Route List in RoutePageList
+  sed -i "/\/\/Page Route List/a $route_code" "$page_file"
 
   echo "✅ View '$viewName' created with clean structure, route, binding, and page entry"
 done
