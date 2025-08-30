@@ -1,12 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-# 🌈 Colors
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-CYAN='\033[0;36m'
-NC='\033[0m'
-
 BASE_DIR="lib"
 
 # Snake_case → PascalCase
@@ -17,13 +11,12 @@ to_pascal_case() {
   done
 }
 
-# RoutePageList.list এ GetPage auto add
+# RoutePageList.list auto add
 add_to_route_page_list() {
   local viewName="$1"
   local pascalName
   pascalName=$(to_pascal_case "$viewName")
-
-  local routePageListFile="lib/routes/route_page_list.dart"
+  local routePageListFile="$BASE_DIR/routes/route_page_list.dart"
 
   if [ ! -f "$routePageListFile" ]; then
     echo "❌ $routePageListFile ফাইল নেই!"
@@ -39,26 +32,23 @@ add_to_route_page_list() {
   fi
 
   sed -i "$((lineNumber+1)) i\    GetPage(\n      name: Routes.$viewName,\n      page: () => const ${pascalName}Screen(),\n      binding: ${pascalName}Binding(),\n    ),\n" "$routePageListFile"
-
-  echo -e "${GREEN}✅ $pascalName GetPage যুক্ত হয়েছে RoutePageList.list এ${NC}"
+  echo "✅ $pascalName GetPage যুক্ত হয়েছে RoutePageList.list এ"
 }
 
-# Views generate
-generate_views() {
-  echo -ne "${CYAN}📥 Enter View Names (space-separated): ${NC}"
-  read -r viewNames
+# Generate Local View
+generate_local_view() {
+  local viewName="$1"
+  local pascalName
+  pascalName=$(to_pascal_case "$viewName")
 
-  for viewName in $viewNames; do
-    pascalName=$(to_pascal_case "$viewName")
+  # Folder structure
+  mkdir -p "$BASE_DIR/views/$viewName/screen" \
+           "$BASE_DIR/views/$viewName/widget" \
+           "$BASE_DIR/views/$viewName/controller" \
+           "$BASE_DIR/bind"
 
-    # Folder structure
-    mkdir -p "$BASE_DIR/views/$viewName/screen"
-    mkdir -p "$BASE_DIR/views/$viewName/widget"
-    mkdir -p "$BASE_DIR/views/$viewName/controller"
-    mkdir -p "$BASE_DIR/bind"
-
-    # Screen
-    cat > "$BASE_DIR/views/$viewName/screen/${viewName}_screen.dart" <<EOF
+  # Screen
+  cat > "$BASE_DIR/views/$viewName/screen/${viewName}_screen.dart" <<EOF
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/utils/layout.dart';
@@ -79,15 +69,15 @@ class ${pascalName}Screen extends GetView<${pascalName}Controller> {
 }
 EOF
 
-    # Controller
-    cat > "$BASE_DIR/views/$viewName/controller/${viewName}_controller.dart" <<EOF
+  # Controller
+  cat > "$BASE_DIR/views/$viewName/controller/${viewName}_controller.dart" <<EOF
 import 'package:get/get.dart';
 
 class ${pascalName}Controller extends GetxController {}
 EOF
 
-    # Binding
-    cat > "$BASE_DIR/bind/${viewName}_binding.dart" <<EOF
+  # Binding
+  cat > "$BASE_DIR/bind/${viewName}_binding.dart" <<EOF
 import 'package:get/get.dart';
 import '../views/$viewName/controller/${viewName}_controller.dart';
 
@@ -99,8 +89,8 @@ class ${pascalName}Binding extends Bindings {
 }
 EOF
 
-    # Widget
-    cat > "$BASE_DIR/views/$viewName/widget/${viewName}_widget.dart" <<EOF
+  # Widget
+  cat > "$BASE_DIR/views/$viewName/widget/${viewName}_widget.dart" <<EOF
 part of '../screen/${viewName}_screen.dart';
 
 class ${pascalName}Widget extends StatelessWidget {
@@ -113,18 +103,15 @@ class ${pascalName}Widget extends StatelessWidget {
 }
 EOF
 
-    # RoutePageList add
-    add_to_route_page_list "$viewName"
+  add_to_route_page_list "$viewName"
 
-  done
+  echo "✅ View '$viewName' local তৈরি হয়েছে!"
 }
 
-# Main menu
-case "$1" in
-  generate-views)
-    generate_views
-    ;;
-  *)
-    echo "Usage: ./rakib.sh generate-views"
-    ;;
-esac
+# Main
+echo "📥 Enter View Names (space-separated) for local generation:"
+read -r viewNames
+
+for view in $viewNames; do
+    generate_local_view "$view"
+done
