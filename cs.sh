@@ -64,13 +64,17 @@ touch "$BASE_DIR"/{main.dart,initial.dart}
 # ---------------- main.dart
 echo -e "${YELLOW}📄 Writing main.dart ...${NC}"
 cat <<EOF > "$BASE_DIR/main.dart"
+import 'core/languages/strings.dart';
+import 'core/themes/token.dart';
 import 'core/utils/basic_import.dart';
 import 'initial.dart';
+import 'routes/routes.dart';
+import 'views/splash/controller/splash_controller.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Initial.init();
- // Get.put(NetworkController());
+  // Get.put(NetworkController());
 
   SystemChrome.setSystemUIOverlayStyle(
     SystemUiOverlayStyle(
@@ -94,18 +98,27 @@ class MyApp extends StatelessWidget {
       designSize: const Size(375, 812),
       builder: (_, child) => GetMaterialApp(
         debugShowCheckedModeBanner: false,
-        initialRoute: '/', // later change to Routes.splashScreen
-        title: 'My App',   // later use Strings.appName
-        theme: ThemeData.light(),  // later use Themes.light
-        darkTheme: ThemeData.dark(), // later use Themes.dark
-        getPages: [], // later add Routes.list
+        initialRoute: Routes.splashScreen,
+        title: Strings.appName,
+        theme: Themes.light,
+        darkTheme: Themes.dark,
+        getPages: Routes.list,
+        defaultTransition: Transition.cupertino,
+        transitionDuration: const Duration(milliseconds: 300),
         themeMode: ThemeMode.light,
+        initialBinding: BindingsBuilder(() {
+          Get.lazyPut(() => SplashController());
+        }),
         builder: (context, widget) {
           ScreenUtil.init(context);
           return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+            data: MediaQuery.of(
+              context,
+            ).copyWith(textScaler: TextScaler.linear(1.0)),
             child: Directionality(
-              textDirection: TextDirection.ltr,
+              textDirection: Get.locale?.languageCode == 'ar'
+                  ? TextDirection.rtl
+                  : TextDirection.ltr,
               child: widget!,
             ),
           );
