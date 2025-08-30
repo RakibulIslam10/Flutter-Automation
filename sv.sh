@@ -1,164 +1,110 @@
-import 'dart:io';
+#!/bin/bash
 
-void main(List<String> args) {
-  if (args.isEmpty) {
-    print('Error: No view names provided.');
-    return;
-  }
+# 🔠 Capitalize first letter
+capitalize() {
+  echo "$1" | awk '{ print toupper(substr($0,1,1)) tolower(substr($0,2)) }'
+}
 
-  List<String> viewsList = args;
+for viewName in "$@"; do
+  capitalizedViewName=$(capitalize "$viewName")
+  base_dir="lib/views/$viewName"
+  echo "📦 Generating view: $viewName"
 
-  Directory('lib/views').createSync(recursive: true);
-  Directory('lib/bindings').createSync(recursive: true);
+  mkdir -p "$base_dir/controller"
+  mkdir -p "$base_dir/screen"
+  mkdir -p "$base_dir/widget"
+  mkdir -p "lib/bind"
 
-  String capitalize(String input) {
-    if (input.isEmpty) return input;
-    return input
-        .split('_')
-        .map((word) => word[0].toUpperCase() + word.substring(1))
-        .join('');
-  }
-
-  void writeFile(String path, String content) {
-    File(path).createSync(recursive: true);
-    File(path).writeAsStringSync(content);
-  }
-
-  void appendRoute(String className, String viewName) {
-    final routesFile = File('lib/routes/routes.dart');
-    if (routesFile.existsSync()) {
-      final content = routesFile.readAsStringSync();
-      final routeConstant =
-          "  static const ${viewName}Screen = '/${viewName}Screen';\n";
-      if (!content.contains(routeConstant)) {
-        final insertPos = content.lastIndexOf('}');
-        final newContent = content.substring(0, insertPos) +
-            routeConstant +
-            content.substring(insertPos);
-        routesFile.writeAsStringSync(newContent);
-        print("✅ Route constant added for $className");
-      }
-    }
-
-    final pagesFile = File('lib/routes/route_pages.dart');
-    if (pagesFile.existsSync()) {
-      final content = pagesFile.readAsStringSync();
-      final routeCode = """
-    GetPage(
-      name: Routes.${viewName}Screen,
-      page: () => const ${className}Screen(),
-      binding: ${className}Binding(),
-    ),
-""";
-      final insertPos = content.indexOf('static var list = [');
-      if (insertPos != -1) {
-        final insertAfter = content.indexOf('[', insertPos) + 1;
-        final newContent =
-            content.substring(0, insertAfter) + '\n' + routeCode + content.substring(insertAfter);
-        pagesFile.writeAsStringSync(newContent);
-        print("✅ Route page added for $className");
-      }
-    }
-  }
-
-  for (var viewName in viewsList) {
-    final className = capitalize(viewName);
-
-    // Create folders
-    Directory('lib/views/$viewName/controller').createSync(recursive: true);
-    Directory('lib/views/$viewName/screen').createSync(recursive: true);
-    Directory('lib/views/$viewName/widget').createSync(recursive: true);
-
-    // File paths
-    final controllerPath = 'lib/views/$viewName/controller/${viewName}_controller.dart';
-    final screenPath = 'lib/views/$viewName/screen/${viewName}_screen.dart';
-    final mobileScreenPath = 'lib/views/$viewName/screen/${viewName}_mobile_screen.dart';
-    final tabletScreenPath = 'lib/views/$viewName/screen/${viewName}_tablet_screen.dart';
-    final bindingPath = 'lib/bindings/${viewName}_binding.dart';
-
-    // File contents
-    final controllerContent = '''
+  # 🎯 Controller File
+  cat <<EOF > "$base_dir/controller/${viewName}_controller.dart"
 import 'package:get/get.dart';
 
-class ${className}Controller extends GetxController {}
-''';
+class ${capitalizedViewName}Controller extends GetxController {
+  // TODO: Logic 
+}
+EOF
 
-    final screenContent = '''
+  # 📱 Mobile Screen File
+  cat <<EOF > "$base_dir/screen/${viewName}_screen_mobile.dart"
+part of '${viewName}_screen.dart';
+
+class ${capitalizedViewName}ScreenMobile extends GetView<${capitalizedViewName}Controller> {
+  const ${capitalizedViewName}ScreenMobile({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: ListView(
+          padding: Dimensions.defaultHorizontalSize.edgeHorizontal,
+          children: [
+            
+          ],
+        ),
+      ),
+    );
+  }
+}
+EOF
+
+  # 🧩 Main Screen File
+  cat <<EOF > "$base_dir/screen/${viewName}_screen.dart"
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../core/utils/dimensions.dart';
 import '../controller/${viewName}_controller.dart';
-part '${viewName}_mobile_screen.dart';
-part '${viewName}_tablet_screen.dart';
 
-class ${className}Screen extends GetView<${className}Controller> {
-  const ${className}Screen({Key? key}) : super(key: key);
+part '${viewName}_screen_mobile.dart';
+EOF
 
-  @override
-  Widget build(BuildContext context) {
-    return ResponsiveLayout(
-      mobile: ${className}MobileScreen(),
-      tablet: ${className}TabletScreen(),
-    );
-  }
-}
-''';
+  # 🔧 Add part lines for each widget file (if any exist)
+  for widgetPath in "$base_dir/widget/"*.dart; do
+    widgetFileName=$(basename "$widgetPath")
+    echo "part '../widget/$widgetFileName';" >> "$base_dir/screen/${viewName}_screen.dart"
+  done
 
-    final mobileScreenContent = '''
-part of '${viewName}_screen.dart';
+  # 🔚 Append class definition to screen.dart
+  cat <<EOF >> "$base_dir/screen/${viewName}_screen.dart"
 
-class ${className}MobileScreen extends GetView<${className}Controller> {
-  const ${className}MobileScreen({super.key});
+class ${capitalizedViewName}Screen extends GetView<${capitalizedViewName}Controller> {
+  const ${capitalizedViewName}Screen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Column(children: []),
-      ),
-    );
+    return Layout(mobile: ${capitalizedViewName}ScreenMobile());
   }
 }
-''';
+EOF
 
-    final tabletScreenContent = '''
-part of '${viewName}_screen.dart';
-
-class ${className}TabletScreen extends GetView<${className}Controller> {
-  const ${className}TabletScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Column(children: []),
-      ),
-    );
-  }
-}
-''';
-
-    final bindingContent = '''
+  # 🔗 Binding File
+  cat <<EOF > "lib/bind/${viewName}_binding.dart"
 import 'package:get/get.dart';
 import '../views/$viewName/controller/${viewName}_controller.dart';
 
-class ${className}Binding extends Bindings {
+class ${capitalizedViewName}Binding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut(() => ${className}Controller());
+    Get.lazyPut<${capitalizedViewName}Controller>(() => ${capitalizedViewName}Controller());
   }
 }
-''';
+EOF
 
-    // Write files
-    writeFile(controllerPath, controllerContent);
-    writeFile(screenPath, screenContent);
-    writeFile(mobileScreenPath, mobileScreenContent);
-    writeFile(tabletScreenPath, tabletScreenContent);
-    writeFile(bindingPath, bindingContent);
+  # 🛤️ Add route constant to routes.dart
+  route_file="lib/routes/routes.dart"
+  route_name="${viewName}Screen"
+  route_const="  static const $route_name = '/$route_name';"
+  grep -qxF "$route_const" "$route_file" || sed -i "/static var list = RoutePageList.list;/a $route_const" "$route_file"
 
-    // Add routes
-    appendRoute(className, viewName);
-  }
+  # 📥 Add GetPage to pages.dart
+  page_file="lib/routes/pages.dart"
+  screen_import="import '../views/$viewName/screen/${viewName}_screen.dart';"
+  binding_import="import '../bind/${viewName}_binding.dart';"
 
-  print("✅ All views generated successfully!");
-}
+  grep -qxF "$screen_import" "$page_file" || sed -i "/^import/a $screen_import" "$page_file"
+  grep -qxF "$binding_import" "$page_file" || sed -i "/^import/a $binding_import" "$page_file"
+
+  route_code="    GetPage(\n    name: Routes.$viewName,\n    page: () => const ${capitalizedViewName}Screen(),\n    binding: ${capitalizedViewName}Binding(),\n  ),"
+  sed -i "/\/\/Page Route List/a $route_code" "$page_file"
+
+  echo "✅ View '$viewName' created with clean structure, route, binding, and widget part links"
+done
