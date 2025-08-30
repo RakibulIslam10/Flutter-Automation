@@ -25,7 +25,6 @@ mkdir -p "$BASE_DIR/core/api"/{end_point,services}
 touch "$BASE_DIR/core/api/services"/{api_request.dart,auth_services.dart}
 touch "$BASE_DIR/core/api/end_point"/api_end_points.dart
 touch "$BASE_DIR/core/utils"/{basic_import.dart,app_storage.dart,app_storage_model.dart,custom_style.dart,dimensions.dart,extensions.dart,layout.dart,space.dart}
-touch "$BASE_DIR/core/helpers"/{helpers.dart}
 touch "$BASE_DIR/core/themes"/{custom_colors.dart,model.dart,themes.dart,token.dart}
 touch "$BASE_DIR/core/languages"/{localization.dart,strings.dart}
 
