@@ -56,10 +56,6 @@ import '../../../core/utils/layout.dart';
 import '../controller/${viewName}_controller.dart';
 
 part '${viewName}_screen_mobile.dart';
-EOF
-
-  # 🔚 Append class definition to screen.dart
-  cat <<EOF >> "$base_dir/screen/${viewName}_screen.dart"
 
 class ${capitalizedViewName}Screen extends GetView<${capitalizedViewName}Controller> {
   const ${capitalizedViewName}Screen({super.key});
@@ -91,16 +87,15 @@ EOF
   grep -qxF "$route_const" "$route_file" || sed -i "/static var list = RoutePageList.list;/a $route_const" "$route_file"
 
   # 📥 Add GetPage to pages.dart
-# 📥 Add GetPage to pages.dart (only the GetPage entry, no imports)
-page_file="lib/routes/pages.dart"
-route_name="${viewName}Screen"
-
-route_code="    GetPage(
+  page_file="lib/routes/pages.dart"
+  route_code="    GetPage(
       name: Routes.${route_name},
       page: () => const ${capitalizedViewName}Screen(),
       binding: ${capitalizedViewName}Binding(),
     ),"
-sed -i "/\/\/Page Route List/a $route_code" "$page_file"
+  
+  # Add the GetPage entry **inside the list** before the closing bracket
+  sed -i "/static var list = \[/a $route_code" "$page_file"
 
-  echo "✅ View '$viewName' created with clean structure, route, binding, and widget part links"
+  echo "✅ View '$viewName' created with GetPage entry added to pages.dart"
 done
