@@ -424,6 +424,7 @@ echo "✅ pages.dart created"
 
 # Routes.dart
 cat > "$BASE_DIR/routes/routes.dart" <<EOF
+import 'package:get/get_navigation/src/routes/get_route.dart';
 part 'pages.dart';
 
 class Routes {
