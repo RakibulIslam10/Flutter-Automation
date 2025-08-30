@@ -87,7 +87,7 @@ EOF
   # 🛤️ Add route constant to routes.dart
   route_file="lib/routes/routes.dart"
   route_name="${viewName}Screen"
-  route_const="         static const $route_name = '/$route_name';"
+  route_const="static const $route_name = '/$route_name';"
   grep -qxF "$route_const" "$route_file" || sed -i "/static var list = RoutePageList.list;/a $route_const" "$route_file"
 
   # 📥 Add GetPage to pages.dart
