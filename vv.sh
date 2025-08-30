@@ -98,7 +98,7 @@ EOF
   grep -qxF "$screen_import" "$page_file" || sed -i "/^import/a $screen_import" "$page_file"
   grep -qxF "$binding_import" "$page_file" || sed -i "/^import/a $binding_import" "$page_file"
 
-  route_code="                   GetPage(\n    name: Routes.${viewName}Screen,\n    page: () => const ${capitalizedViewName}Screen(),\n    binding: ${capitalizedViewName}Binding(),\n  ),"
+  route_code="GetPage(\n    name: Routes.${viewName}Screen,\n    page: () => const ${capitalizedViewName}Screen(),\n    binding: ${capitalizedViewName}Binding(),\n  ),"
   sed -i "/\/\/Page Route List/a $route_code" "$page_file"
 
   echo "✅ View '$viewName' created with clean structure, route, binding, and widget part links"
