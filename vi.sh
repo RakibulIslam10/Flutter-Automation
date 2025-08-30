@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DART_SCRIPT_URL="https://raw.githubusercontent.com/rabbihossenjoy/gen/main/generate_views.dart"
+DART_SCRIPT_URL="https://raw.githubusercontent.com/RakibulIslam10/Flutter-Automation/refs/heads/main/sv.sh"
 DART_SCRIPT="generate_views.dart"
 
 if [ $# -eq 0 ]; then
