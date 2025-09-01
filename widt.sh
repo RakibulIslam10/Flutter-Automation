@@ -4,6 +4,7 @@ viewName=$1
 shift
 
 widget_dir="lib/views/$viewName/widget"
+screen_file="lib/views/$viewName/screen/${viewName}_screen.dart"
 mkdir -p "$widget_dir"
 
 to_pascal_case() {
@@ -22,6 +23,7 @@ for widgetName in "$@"; do
 
   echo "🧱 Generating GetView widget: $pascalName → HomeController"
 
+  # Create widget file
   cat <<EOF > "$file"
 part of '../screen/${viewName}_screen.dart';
 
@@ -35,6 +37,14 @@ class ${pascalName}WidgetView extends GetView<HomeController> {
 }
 EOF
 
+  # Add part line into home_screen.dart if not exists
+  part_line="part '../widget/${widgetName}.dart';"
+  if ! grep -Fxq "$part_line" "$screen_file"; then
+    echo "$part_line" >> "$screen_file"
+    echo "🔗 Added part to $screen_file"
+  else
+    echo "ℹ️ Part already exists in $screen_file"
+  fi
 done
 
-echo "✅ GetView widgets created successfully!"
+echo "✅ GetView widgets created and linked successfully!"
