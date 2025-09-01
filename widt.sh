@@ -18,24 +18,19 @@ to_pascal_case() {
 
 for widgetName in "$@"; do
   pascalName=$(to_pascal_case "$widgetName")
-  controllerName="${pascalName}Controller"
   file="$widget_dir/${widgetName}.dart"
 
-  echo "🧱 Generating GetView widget: $pascalName → $controllerName"
+  echo "🧱 Generating GetView widget: $pascalName → HomeController"
 
   cat <<EOF > "$file"
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import '../controller/${widgetName}_controller.dart';
+part of '../screen/${viewName}_screen.dart';
 
-class ${pascalName}View extends GetView<$controllerName> {
-  const ${pascalName}View({super.key});
+class ${pascalName}WidgetView extends GetView<HomeController> {
+  const ${pascalName}WidgetView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Text('${pascalName}View'),
-    );
+    return Text('${pascalName}WidgetView');
   }
 }
 EOF
