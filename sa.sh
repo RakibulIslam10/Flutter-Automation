@@ -19,15 +19,12 @@ echo "==============================="
 RELEASE_KEYSTORE="android/app/my-release-key.jks"
 RELEASE_ALIAS="my-key-alias"
 
-# Check if release keystore exists
 if [ ! -f "$RELEASE_KEYSTORE" ]; then
-    echo "🛠️ Release keystore not found! Creating a new one..."
-    read -p "Enter keystore password: " STOREPASS
-    read -p "Enter key password: " KEYPASS
-    keytool -genkey -v -keystore $RELEASE_KEYSTORE -alias $RELEASE_ALIAS -keyalg RSA -keysize 2048 -validity 10000 -storepass $STOREPASS -keypass $KEYPASS
-else
-    read -p "Enter keystore password: " STOREPASS
-    read -p "Enter key password: " KEYPASS
+    echo "🛠️ Release keystore not found! Auto-creating..."
+    STOREPASS="123456"  # default password
+    KEYPASS="123456"    # default password
+
+    keytool -genkey -v -keystore $RELEASE_KEYSTORE -alias $RELEASE_ALIAS -keyalg RSA -keysize 2048 -validity 10000 -storepass $STOREPASS -keypass $KEYPASS -dname "CN=YourName, OU=Dev, O=Company, L=City, ST=State, C=BD"
 fi
 
 echo "==============================="
