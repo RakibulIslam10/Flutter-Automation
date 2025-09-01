@@ -16,16 +16,21 @@ fi
 echo "==============================="
 
 # 🔹 Release SHA1
-# Update these variables with your release keystore info
 RELEASE_KEYSTORE="android/app/my-release-key.jks"
 RELEASE_ALIAS="my-key-alias"
-RELEASE_STOREPASS="your_keystore_password"
-RELEASE_KEYPASS="your_key_password"
 
-echo "🔹 Release SHA1:"
-if [ -f "$RELEASE_KEYSTORE" ]; then
-    keytool -list -v -alias $RELEASE_ALIAS -keystore $RELEASE_KEYSTORE -storepass $RELEASE_STOREPASS -keypass $RELEASE_KEYPASS | grep SHA1 | awk '{print $2}'
+# Check if release keystore exists
+if [ ! -f "$RELEASE_KEYSTORE" ]; then
+    echo "🛠️ Release keystore not found! Creating a new one..."
+    read -p "Enter keystore password: " STOREPASS
+    read -p "Enter key password: " KEYPASS
+    keytool -genkey -v -keystore $RELEASE_KEYSTORE -alias $RELEASE_ALIAS -keyalg RSA -keysize 2048 -validity 10000 -storepass $STOREPASS -keypass $KEYPASS
 else
-    echo "❌ Release keystore not found at $RELEASE_KEYSTORE"
+    read -p "Enter keystore password: " STOREPASS
+    read -p "Enter key password: " KEYPASS
 fi
+
+echo "==============================="
+echo "🔹 Release SHA1:"
+keytool -list -v -alias $RELEASE_ALIAS -keystore $RELEASE_KEYSTORE -storepass $STOREPASS -keypass $KEYPASS | grep SHA1 | awk '{print $2}'
 echo "==============================="
