@@ -1,3 +1,6 @@
+
+
+
 #!/bin/bash
 
 # 🔠 Convert snake_case to PascalCase
@@ -92,7 +95,7 @@ EOF
   # 🛤️ Add route constant to routes.dart
   route_file="lib/routes/routes.dart"
   route_name="${viewName}Screen"
-  route_const="static const $route_name = '/$route_name';"
+  route_const="  static const $route_name = '/$route_name';"
   grep -qxF "$route_const" "$route_file" || sed -i "/static var list = RoutePageList.list;/a $route_const" "$route_file"
 
   # 📥 Add GetPage to pages.dart
@@ -103,7 +106,7 @@ EOF
   grep -qxF "$screen_import" "$page_file" || sed -i "/^import/a $screen_import" "$page_file"
   grep -qxF "$binding_import" "$page_file" || sed -i "/^import/a $binding_import" "$page_file"
 
-  route_code="GetPage(\n    name: Routes.${viewName}Screen,\n    page: () => const ${capitalizedViewName}Screen(),\n    binding: ${capitalizedViewName}Binding(),\n  ),"
+  route_code="    GetPage(\n    name: Routes.${viewName}Screen,\n    page: () => const ${capitalizedViewName}Screen(),\n    binding: ${capitalizedViewName}Binding(),\n  ),"
   sed -i "/\/\/Page Route List/a $route_code" "$page_file"
 
   echo "✅ View '$viewName' created with clean structure, route, binding, and widget part links"
