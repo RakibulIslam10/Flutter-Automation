@@ -19,8 +19,8 @@ camelCase() {
 }
 
 for viewName in "$@"; do
-  capitalizedViewName=$(capitalize "$viewName")           # CategoryPreview
-  routeName=$(camelCase "${capitalizedViewName}Screen")  # categoryPreviewScreen
+  capitalizedViewName=$(capitalize "$viewName")       
+  routeName=$(camelCase "${capitalizedViewName}Screen")  
   base_dir="lib/views/$viewName"
   echo "📦 Generating view: $viewName"
 
@@ -100,8 +100,8 @@ EOF
 
   # 🛤️ Add route constant to routes.dart
   route_file="lib/routes/routes.dart"
-  route_const="  static const $routeName = '/$routeName';"
-  grep -qxF "$route_const" "$route_file" || sed -i "/class RoutePageList/i $route_const" "$route_file"
+  route_const="static const $routeName = '/$routeName';"
+  grep -qxF "$route_const" "$route_file" || sed -i "/static var list = RoutePageList.list;/a $route_const" "$route_file"
 
   # 📥 Add GetPage to pages.dart
   page_file="lib/routes/pages.dart"
@@ -111,14 +111,8 @@ EOF
   grep -qxF "$screen_import" "$page_file" || sed -i "/^import/a $screen_import" "$page_file"
   grep -qxF "$binding_import" "$page_file" || sed -i "/^import/a $binding_import" "$page_file"
 
-  route_code="    GetPage(
-      name: Routes.${routeName},
-      page: () => const ${capitalizedViewName}Screen(),
-      binding: ${capitalizedViewName}Binding(),
-    ),"
-
-  # Insert after '//Page Route List' inside the list
+  route_code="GetPage(\n    name: Routes.${routeName},\n    page: () => const ${capitalizedViewName}Screen(),\n    binding: ${capitalizedViewName}Binding(),\n  ),"
   sed -i "/\/\/Page Route List/a $route_code" "$page_file"
 
-  echo "✅ View '$viewName' created with clean structure, camelCase route, binding, and properly indented GetPage"
+  echo "✅ View '$viewName' created with clean structure, route, binding, and widget part links"
 done
