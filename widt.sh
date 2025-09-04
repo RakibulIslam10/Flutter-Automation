@@ -38,7 +38,7 @@ for widgetName in "$@"; do
   pascalName=$(to_pascal_case "$widgetName")
   widget_filename="${widgetName}_widget.dart"
   widget_file="$widget_dir/$widget_filename"
-  className="${pascalName}WidgetView"
+  className="${pascalName}Widget"
 
   echo "🧱 Generating: $widget_file  (class $className extends GetView<$controllerName>)"
 
@@ -50,7 +50,14 @@ class ${className} extends GetView<$controllerName> {
 
   @override
   Widget build(BuildContext context) {
-    return Text('${className}');
+    return Column(
+      crossAxisAlignment: crossStart,
+      children: [
+      Text('${className}');
+
+
+      ],
+    );
   }
 }
 EOF
