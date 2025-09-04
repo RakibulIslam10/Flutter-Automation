@@ -1,8 +1,13 @@
 #!/bin/bash
 
-# 🔠 Capitalize first letter
+# 🔠 Convert snake_case to PascalCase
 capitalize() {
-  echo "$1" | awk '{ print toupper(substr($0,1,1)) tolower(substr($0,2)) }'
+  IFS='_' read -ra parts <<< "$1"
+  result=""
+  for part in "${parts[@]}"; do
+    result+=$(echo "${part:0:1}" | tr '[:lower:]' '[:upper:]')${part:1}
+  done
+  echo "$result"
 }
 
 for viewName in "$@"; do
@@ -20,7 +25,7 @@ for viewName in "$@"; do
 import 'package:get/get.dart';
 
 class ${capitalizedViewName}Controller extends GetxController {
-  // TODO: Logic 
+  // TODO: Logic
 }
 EOF
 
@@ -58,7 +63,7 @@ import '../controller/${viewName}_controller.dart';
 part '${viewName}_screen_mobile.dart';
 EOF
 
-  # 🔚 Append class definition to screen.dart
+  # 🔚 Append class definition to main screen
   cat <<EOF >> "$base_dir/screen/${viewName}_screen.dart"
 
 class ${capitalizedViewName}Screen extends GetView<${capitalizedViewName}Controller> {
