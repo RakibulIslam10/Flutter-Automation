@@ -101,7 +101,7 @@ EOF
   # 🛤️ Add route constant to routes.dart
   route_file="lib/routes/routes.dart"
   route_const="  static const $routeName = '/$routeName';"
-  grep -qxF "$route_const" "$route_file" || sed -i "/static var list = RoutePageList.list;/i $route_const" "$route_file"
+  grep -qxF "$route_const" "$route_file" || sed -i "/class RoutePageList/i $route_const" "$route_file"
 
   # 📥 Add GetPage to pages.dart
   page_file="lib/routes/pages.dart"
@@ -116,7 +116,8 @@ EOF
       page: () => const ${capitalizedViewName}Screen(),
       binding: ${capitalizedViewName}Binding(),
     ),"
-  
+
+  # Insert after '//Page Route List' inside the list
   sed -i "/\/\/Page Route List/a $route_code" "$page_file"
 
   echo "✅ View '$viewName' created with clean structure, camelCase route, binding, and properly indented GetPage"
