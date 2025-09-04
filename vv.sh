@@ -1,6 +1,3 @@
-
-
-
 #!/bin/bash
 
 # 🔠 Convert snake_case to PascalCase
@@ -13,8 +10,17 @@ capitalize() {
   echo "$result"
 }
 
+# 🔡 Convert PascalCase to camelCase
+camelCase() {
+  str="$1"
+  first="${str:0:1}"
+  rest="${str:1}"
+  echo "${first,,}$rest"
+}
+
 for viewName in "$@"; do
-  capitalizedViewName=$(capitalize "$viewName")
+  capitalizedViewName=$(capitalize "$viewName")           # CategoryPreview
+  routeName=$(camelCase "${capitalizedViewName}Screen")  # categoryPreviewScreen
   base_dir="lib/views/$viewName"
   echo "📦 Generating view: $viewName"
 
@@ -94,9 +100,8 @@ EOF
 
   # 🛤️ Add route constant to routes.dart
   route_file="lib/routes/routes.dart"
-  route_name="${viewName}Screen"
-  route_const="  static const $route_name = '/$route_name';"
-  grep -qxF "$route_const" "$route_file" || sed -i "/static var list = RoutePageList.list;/a $route_const" "$route_file"
+  route_const="  static const $routeName = '/$routeName';"
+  grep -qxF "$route_const" "$route_file" || sed -i "/class RoutePageList/i $route_const" "$route_file"
 
   # 📥 Add GetPage to pages.dart
   page_file="lib/routes/pages.dart"
@@ -106,8 +111,14 @@ EOF
   grep -qxF "$screen_import" "$page_file" || sed -i "/^import/a $screen_import" "$page_file"
   grep -qxF "$binding_import" "$page_file" || sed -i "/^import/a $binding_import" "$page_file"
 
-  route_code="    GetPage(\n    name: Routes.${viewName}Screen,\n    page: () => const ${capitalizedViewName}Screen(),\n    binding: ${capitalizedViewName}Binding(),\n  ),"
+  route_code="    GetPage(
+      name: Routes.${routeName},
+      page: () => const ${capitalizedViewName}Screen(),
+      binding: ${capitalizedViewName}Binding(),
+    ),"
+
+  # Insert after '//Page Route List' inside the list
   sed -i "/\/\/Page Route List/a $route_code" "$page_file"
 
-  echo "✅ View '$viewName' created with clean structure, route, binding, and widget part links"
+  echo "✅ View '$viewName' created with clean structure, camelCase route, binding, and properly indented GetPage"
 done
