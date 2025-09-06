@@ -40,10 +40,7 @@ class ${capitalizedViewName}ScreenMobile extends GetView<${capitalizedViewName}C
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "${capitalizedViewName}",
-          style: TextStyle(color: Colors.white),
-        ),
+        title: const Text("Category", style: TextStyle(color: Colors.white)),
         centerTitle: true,
         backgroundColor: Colors.blue,
         iconTheme: const IconThemeData(color: Colors.white),
