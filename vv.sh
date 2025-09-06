@@ -39,6 +39,13 @@ class ${capitalizedViewName}ScreenMobile extends GetView<${capitalizedViewName}C
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+    AppBar(
+        title: Text("${capitalizedViewName}: TextStyle(color: Colors.white)),
+        centerTitle: true,
+        backgroundColor: Colors.blue,
+
+        iconTheme: IconThemeData(color: Colors.white),
+      ),
       body: SafeArea(
         child: ListView(
           padding: Dimensions.defaultHorizontalSize.edgeHorizontal,
@@ -56,6 +63,7 @@ EOF
   cat <<EOF > "$base_dir/screen/${viewName}_screen.dart"
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:doda_work/core/utils/extensions.dart';
 import '../../../core/utils/dimensions.dart';
 import '../../../core/utils/layout.dart';
 import '../controller/${viewName}_controller.dart';
