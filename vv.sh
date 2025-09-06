@@ -29,8 +29,8 @@ class ${capitalizedViewName}Controller extends GetxController {
 }
 EOF
 
-  # 📱 Mobile Screen File
-  cat <<EOF > "$base_dir/screen/${viewName}_screen_mobile.dart"
+# 📱 Mobile Screen File
+cat <<EOF > "$base_dir/screen/${viewName}_screen_mobile.dart"
 part of '${viewName}_screen.dart';
 
 class ${capitalizedViewName}ScreenMobile extends GetView<${capitalizedViewName}Controller> {
@@ -39,18 +39,20 @@ class ${capitalizedViewName}ScreenMobile extends GetView<${capitalizedViewName}C
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-    AppBar(
-        title: Text("${capitalizedViewName}: TextStyle(color: Colors.white)),
+      appBar: AppBar(
+        title: const Text(
+          "${capitalizedViewName}",
+          style: TextStyle(color: Colors.white),
+        ),
         centerTitle: true,
         backgroundColor: Colors.blue,
-
-        iconTheme: IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: SafeArea(
         child: ListView(
           padding: Dimensions.defaultHorizontalSize.edgeHorizontal,
-          children: [
-            
+          children: const [
+            // Add your widgets here
           ],
         ),
       ),
