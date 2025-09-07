@@ -22,8 +22,7 @@ for viewName in "$@"; do
 
   # 🎯 Controller File
   cat <<EOF > "$base_dir/controller/${viewName}_controller.dart"
-import 'package:get/get.dart';
-
+import '../../../core/utils/basic_import.dart';
 class ${capitalizedViewName}Controller extends GetxController {
   // TODO: Logic
 }
