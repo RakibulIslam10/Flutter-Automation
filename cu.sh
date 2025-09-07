@@ -19,15 +19,15 @@ export 'package:flutter_svg/svg.dart';
 export 'package:flutter/services.dart';
 export 'package:flutter_screenutil/flutter_screenutil.dart';
 export 'package:get_storage/get_storage.dart';
-
-
-// add those widgets
-// export '../themes/token.dart';
-// export '../languages/strings.dart';
-// export 'package:starting/routes/routes.dart';
-// export 'package:starting/widgets/text_widget.dart';
-// export 'package:starting/core/utils/space.dart';
-// export 'package:starting/widgets/custom_snackbar.dart';
+export '../../../gen/assets.gen.dart';
+export '../../../core/utils/space.dart';
+export '../../../widgets/primary_input_widget.dart';
+export '../themes/token.dart';
+export '../languages/strings.dart';
+export '../../../widgets/text_widget.dart';
+export '../../../widgets/custom_snackbar.dart';
+export 'package:cached_network_image/cached_network_image.dart';
+export '../../../widgets/primary_button_widget.dart';
 
 
 EOF
@@ -154,6 +154,9 @@ class AppStorage {
       temporaryToken: _storage.read(temporaryTokenKey) ?? '',
       mobileCode: _storage.read(mobileCodeKey) ?? '',
     );
+  }
+    static Future<void> clear() async {
+    await _storage.erase();
   }
 }
 EOF
@@ -440,88 +443,29 @@ echo "✅ Routes.dart created"
 cat > "$BASE_DIR/core/themes/custom_colors.dart" <<EOF
 part of 'token.dart';
 
-class CustomColor {
-  //Light Color
-  static Color primary = HexColor('#FFBA00');
-  static Color secondary = HexColor('#6F6F6F');
-  static Color secondaryTextColor = HexColor('#9F9C96');
-  static Color tertiary = HexColor('#F5F5F5');
-  static Color background = HexColor('#171717');
-  static Color typography = HexColor('#1D1D1D');
-  static Color disableColor = HexColor('#BCBCBC');
-
-  //Dark Color
-  static Color primaryDark = HexColor('#007bff');
-  static Color secondaryDark = HexColor('#FC5B3F');
-  static Color tertiaryDark = HexColor('#1D1D1D');
-  static Color backgroundDark = HexColor('#171717');
-  static Color typographyDark = HexColor('#FFFFFF');
-
-  // Status Color
-  static Color ongoing = HexColor('#FFFFFF');
-  static Color pending = HexColor('#FF9E45');
-  static Color saved = HexColor('#2C8CFA');
-  static Color canceled = HexColor('#FFFFFF');
-  static Color selected = HexColor('#27B059');
-  static Color rejected = HexColor('#DC3A3A');
-  static Color bottomNavColor = HexColor('#00000033');
-
-  // Shade Color
-  static CSM typographyShade = CSM(typography.value, typographyShadeToken);
-  static CSM typographyDarkShade = CSM(typography.value, typoDarkShadeToken);
-  static CSM primaryShade = CSM(primary.value, primaryShadeToken);
-
-  // Others
+class CustomColors {
   static const Color whiteColor = Color(0xffFFFFFF);
   static const Color blackColor = Color(0xFF000000);
   static const Color blueColor = Color(0xFF2323FF);
-  static const Color primaryColorShadeZero = Color(0xFFFFF2F0);
+  static const Color secondary = Color(0xffEB5041);
+  static const Color primary = Color(0xffF57C00);
+  static const Color secondaryDarkText = Color(0xff64748B);
+  static const Color grayShade = Color(0xff777676);
 
-  /// SHADE TOKENS (Done)
-  static Map<int, Color> typographyShadeToken = {
-    100: HexColor('#0A0A0A'),
-    90: HexColor('#0D0D0D'),
-    80: HexColor('#111111'),
-    70: HexColor('#161616'),
-    60: HexColor('#171717'),
-    50: HexColor('#1A1A1A'),
-    40: HexColor('#8C8C8C'),
-    30: HexColor('#B9B9B9'),
-    20: HexColor('#DDDDDD'),
-    10: HexColor('#BBBBBB'),
-    5: HexColor('#D2D2D2'),
-    0: HexColor('#E8E8E8'),
-  };
+  static Color tertiary = Color(0xffF5F5F5);
+  static Color background = Color(0xffF7F8F8);
+  static Color disableColor = Color(0xffBCBCBC);
 
-  //( Not Done)
-  static Map<int, Color> typoDarkShadeToken = {
-    100: HexColor('#FFFFFF'),
-    90: HexColor('#0D0D0D'),
-    80: HexColor('#111111'),
-    70: HexColor('#161616'),
-    60: HexColor('#171717'),
-    50: HexColor('#1A1A1A'),
-    40: HexColor('#FFFFFF'),
-    30: HexColor('#B9B9B9'),
-    20: HexColor('#DDDDDD'),
-    10: HexColor('#BBBBBB'),
-    5: HexColor('#D2D2D2'),
-    0: HexColor('#E8E8E8'),
-  };
+  //Dark Color
+  static Color primaryDark = HexColor('#007bff');
+  static Color secondaryDark = HexColor('#64748B');
+  static Color tertiaryDark = HexColor('#1D1D1D');
+  static Color backgroundDark = HexColor('#171717');
 
-  static Map<int, Color> primaryShadeToken = {
-    100: HexColor('#FFFFFF'),
-    80: HexColor('#FFFFFF'),
-    70: HexColor('#FFFFFF'),
-    60: HexColor('#FFFFFF'),
-    50: HexColor('#FFFFFF'),
-    40: HexColor('#FFFFFF'),
-    30: HexColor('#FFFFFF'),
-    20: HexColor('#FFFFFF'),
-    10: HexColor('#FFFFFF'),
-    0: HexColor('#FFFFFF'),
-  };
+  // Status Color
+  static Color rejected = Color(0xffDC3A3A);
 }
+
 EOF
 
 echo "✅ custom_colors.dart created"
@@ -641,7 +585,6 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'model.dart';
-
 part 'custom_colors.dart';
 
 part 'themes.dart';
@@ -649,10 +592,10 @@ part 'themes.dart';
 // LIGHT THEME DATA - - - - - - - - - - - - - - - - -
 
 final ThemeData lightThemeData = ThemeData.light().copyWith(
-  primaryColor: CustomColor.primary,
+  primaryColor: CustomColors.primary,
   dividerColor: Colors.transparent,
-  colorScheme: ColorScheme.light(tertiary: CustomColor.tertiary),
-  scaffoldBackgroundColor: CustomColor.background,
+  colorScheme: ColorScheme.light(tertiary: CustomColors.tertiary),
+  scaffoldBackgroundColor: CustomColors.whiteColor,
   appBarTheme: AppBarTheme(systemOverlayStyle: SystemUiOverlayStyle.light),
   textTheme: ThemeData.light().textTheme.apply(
     // fontFamily: GoogleFonts.montserrat().fontFamily,
@@ -661,8 +604,8 @@ final ThemeData lightThemeData = ThemeData.light().copyWith(
     style: ElevatedButton.styleFrom(
       surfaceTintColor: Colors.transparent,
       shadowColor: Colors.transparent,
-      backgroundColor: CustomColor.primary,
-      side: BorderSide(color: CustomColor.primary),
+      backgroundColor: CustomColors.primary,
+      side: BorderSide(color: CustomColors.primary),
     ),
   ),
 );
@@ -670,9 +613,9 @@ final ThemeData lightThemeData = ThemeData.light().copyWith(
 // DARK THEME DATA - - - - - - - - - - - - - - - - -
 
 final ThemeData darkThemeData = ThemeData.dark().copyWith(
-  primaryColor: CustomColor.primaryDark,
-  colorScheme: ColorScheme.dark(surface: CustomColor.tertiaryDark),
-  scaffoldBackgroundColor: CustomColor.backgroundDark,
+  primaryColor: CustomColors.primaryDark,
+  colorScheme: ColorScheme.dark(surface: CustomColors.tertiaryDark),
+  scaffoldBackgroundColor: CustomColors.backgroundDark,
   brightness: Brightness.dark,
   textTheme: ThemeData.dark().textTheme.apply(
     // fontFamily: GoogleFonts.inter().fontFamily,
@@ -681,8 +624,8 @@ final ThemeData darkThemeData = ThemeData.dark().copyWith(
     style: ElevatedButton.styleFrom(
       surfaceTintColor: Colors.transparent,
       shadowColor: Colors.transparent,
-      backgroundColor: CustomColor.primary,
-      side: BorderSide(color: CustomColor.primary),
+      backgroundColor: CustomColors.primary,
+      side: BorderSide(color: CustomColors.primary),
     ),
   ),
 );
