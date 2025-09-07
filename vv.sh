@@ -62,7 +62,7 @@ EOF
   cat <<EOF > "$base_dir/screen/${viewName}_screen.dart"
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ntsamela/core/utils/basic_import.dart';
+import '../../../core/utils/basic_import.dart';
 import '../../../core/utils/dimensions.dart';
 import '../../../core/utils/layout.dart';
 import '../controller/${viewName}_controller.dart';
