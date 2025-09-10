@@ -42,7 +42,7 @@ class ${capitalizedViewName}ScreenMobile extends GetView<${capitalizedViewName}C
       body: SafeArea(
         child: ListView(
           padding: Dimensions.defaultHorizontalSize.edgeHorizontal,
-          children: const [
+          children: [
 
           
           ],
@@ -56,6 +56,7 @@ EOF
   # 🧩 Main Screen File
   cat <<EOF > "$base_dir/screen/${viewName}_screen.dart"
 import '../../../core/utils/basic_import.dart';
+import '../../../widgets/auth_app_bar.dart';
 import '../controller/${viewName}_controller.dart';
 
 part '${viewName}_screen_mobile.dart';
