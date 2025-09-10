@@ -38,17 +38,13 @@ class ${capitalizedViewName}ScreenMobile extends GetView<${capitalizedViewName}C
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("${capitalizedViewName}", style: TextStyle(color: Colors.white)),
-        centerTitle: true,
-        backgroundColor: Colors.blue,
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
+      appBar: CommonAppBar(title: "${capitalizedViewName}"),
       body: SafeArea(
         child: ListView(
           padding: Dimensions.defaultHorizontalSize.edgeHorizontal,
           children: const [
-            // Add your widgets here
+
+          
           ],
         ),
       ),
