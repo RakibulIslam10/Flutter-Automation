@@ -46,14 +46,19 @@ dependencies:
   http:
 
 dev_dependencies:
+  change_app_package_name: ^1.4.0
+  rename_app: ^1.6.5
+  
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
   build_runner:
   flutter_gen_runner:
 
-flutter:
+  # dart run rename_app:main all="My App Name"
+  # flutter pub run change_app_package_name:main net.appdevs.carbo
 
+flutter:
   uses-material-design: true
 
   assets:
