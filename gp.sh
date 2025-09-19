@@ -2,15 +2,14 @@
 
 # ---------------------------------------
 # Auto Git Push Script
-# Usage: curl -sL https://raw.githubusercontent.com/username/repo/main/push_my_code.sh | bash
+# Usage: Save as push_my_code.sh and run:
+# bash push_my_code.sh
 # ---------------------------------------
 
 # Check if git is installed
 if ! command -v git &> /dev/null
 then
     echo "Git is not installed. Installing..."
-    
-    # Detect OS
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         sudo apt update && sudo apt install git -y
     elif [[ "$OSTYPE" == "darwin"* ]]; then
@@ -44,20 +43,25 @@ fi
 # Check for remote origin
 remote=$(git remote get-url origin 2>/dev/null)
 if [ -z "$remote" ]; then
-    read -p "Enter GitHub repo name (will create https://github.com/$git_user/REPO.git): " repo_name
+    read -p "Remote not found. Enter your GitHub repo name (already created on GitHub): " repo_name
     git remote add origin "https://github.com/$git_user/$repo_name.git"
-    
-    # Create the repo on GitHub using GitHub CLI if installed
-    if command -v gh &> /dev/null; then
-        gh repo create "$repo_name" --public --source=. --remote=origin --push
-    else
-        echo "GitHub CLI not installed. Make sure you create repo $repo_name manually if it doesn't exist."
-    fi
+    echo "Added remote origin https://github.com/$git_user/$repo_name.git"
 fi
 
 # Add, commit, push
 git add .
-git commit -m "Auto push from script" 2>/dev/null
-git push -u origin main 2>/dev/null || git push -u origin master
+# commit only if there are changes
+if ! git diff-index --quiet HEAD --; then
+    git commit -m "Auto push from script"
+fi
+
+# Determine branch (main or master)
+branch=$(git branch --show-current)
+if [ -z "$branch" ]; then
+    branch="main"
+    git branch -M $branch
+fi
+
+git push -u origin $branch
 
 echo "✅ Code pushed successfully!"
