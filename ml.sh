@@ -54,7 +54,8 @@ dev_dependencies:
   flutter_lints: ^5.0.0
   build_runner:
   flutter_gen_runner:
-
+  
+  # dart run build_runner build
   # dart run rename_app:main all="My App Name"
   # flutter pub run change_app_package_name:main net.appdevs.carbo
 
