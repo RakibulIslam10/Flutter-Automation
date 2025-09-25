@@ -197,8 +197,8 @@ echo "✅ app_storage_model.dart created"
 
 # space.dart
 cat > "$BASE_DIR/core/utils/space.dart" <<EOF
-import 'package:flutter/material.dart';
-import 'dimensions.dart';
+import 'package:e_commerce/core/utils/basic_import.dart';
+
 
 class Space {
   static SizeHeightModel height = SizeHeightModel(
