@@ -4,7 +4,7 @@
 ASSET_FOLDERS=("assets/dummy" "assets/icons" "assets/logo")
 
 # Dry run mode (set to true to only print, false to delete)
-DRY_RUN=true
+DRY_RUN=false
 
 # Collect all used assets from Dart files
 USED_ASSETS=$(grep -rho "assets/[^'\"\s]*" lib | sort | uniq)
