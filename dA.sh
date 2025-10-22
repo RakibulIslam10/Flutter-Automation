@@ -1,13 +1,8 @@
 #!/usr/bin/env bash
 
-# ✅ Read mode (dry-run or delete)
 MODE=$1
 
-# Folders to scan
 ASSET_FOLDERS=("assets/dummy" "assets/icons" "assets/logo")
-
-# Collect all used assets from Dart files
-USED_ASSETS=$(grep -rho "assets/[^'\"\s]*" lib | sort | uniq)
 
 if [ "$MODE" == "dry-run" ]; then
   echo "🔍 Running in DRY RUN mode — will only show unused assets"
@@ -16,34 +11,50 @@ else
 fi
 
 echo ""
+echo "🔎 Collecting used assets from Dart files..."
+
+# Collect assets used directly like 'assets/...'
+USED_ASSETS=$(grep -rho "assets/[^'\"\s]*" lib 2>/dev/null)
+
+# Collect FlutterGen asset references like Assets.icons.frame etc.
+GEN_REFS=$(grep -rho "Assets\.[a-zA-Z0-9_\.]*" lib 2>/dev/null)
+
+# Map FlutterGen keys to actual asset paths from generated file (flutter_gen)
+if [ -f "lib/gen/assets.gen.dart" ]; then
+  while read -r LINE; do
+    # Extract path
+    PATH_MATCH=$(echo "$LINE" | grep -o "'assets/[^']*'")
+    if [ -n "$PATH_MATCH" ]; then
+      CLEAN_PATH=$(echo "$PATH_MATCH" | tr -d "'")
+      USED_ASSETS+=$'\n'"$CLEAN_PATH"
+    fi
+  done < lib/gen/assets.gen.dart
+fi
+
+# Remove duplicates
+USED_ASSETS=$(echo "$USED_ASSETS" | sort | uniq)
+
+echo "✅ Found $(echo "$USED_ASSETS" | wc -l) used asset references."
+echo ""
 echo "🔎 Scanning for unused assets..."
 
-# Loop through each asset folder
 for FOLDER in "${ASSET_FOLDERS[@]}"; do
   if [ ! -d "$FOLDER" ]; then
     echo "⚠️ Folder $FOLDER does not exist, skipping."
     continue
   fi
 
-  # Loop through all files in the folder
   find "$FOLDER" -type f | while read FILE; do
-    KEEP=false
-    for USED in $USED_ASSETS; do
-      BASENAME_USED=$(basename "$USED")
-      BASENAME_FILE=$(basename "$FILE")
-      if [ "$BASENAME_USED" == "$BASENAME_FILE" ]; then
-        KEEP=true
-        break
-      fi
-    done
+    REL_PATH=$(echo "$FILE" | sed 's|^\./||')
+    if echo "$USED_ASSETS" | grep -q "$REL_PATH"; then
+      continue
+    fi
 
-    if [ "$KEEP" = false ]; then
-      if [ "$MODE" == "dry-run" ]; then
-        echo "❌ Unused: $FILE"
-      else
-        echo "🗑️ Deleting: $FILE"
-        rm -f "$FILE"
-      fi
+    if [ "$MODE" == "dry-run" ]; then
+      echo "❌ Unused: $FILE"
+    else
+      echo "🗑️ Deleting: $FILE"
+      rm -f "$FILE"
     fi
   done
 done
