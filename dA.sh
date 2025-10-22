@@ -2,62 +2,57 @@
 
 MODE=$1
 
-ASSET_FOLDERS=("assets/dummy" "assets/icons" "assets/logo")
+# 🧩 Asset folders to check
+ASSET_FOLDERS=("assets/icons" "assets/logo" "assets/dummy")
 
-if [ "$MODE" == "dry-run" ]; then
-  echo "🔍 Running in DRY RUN mode — will only show unused assets"
-else
-  echo "🧹 Running in DELETE mode — unused assets will be deleted"
-fi
-
+echo "🚀 FlutterGen Asset Cleaner"
+echo "Mode: $MODE"
 echo ""
-echo "🔎 Collecting used assets from Dart files..."
 
-# Collect assets used directly like 'assets/...'
-USED_ASSETS=$(grep -rho "assets/[^'\"\s]*" lib 2>/dev/null)
+# ✅ Collect all used asset references from Dart files
+USED_ASSETS=$(grep -rhoE "Assets\.[A-Za-z0-9_\.]+|assets/[A-Za-z0-9_/\.-]+" lib | sort | uniq)
 
-# Collect FlutterGen asset references like Assets.icons.frame etc.
-GEN_REFS=$(grep -rho "Assets\.[a-zA-Z0-9_\.]*" lib 2>/dev/null)
-
-# Map FlutterGen keys to actual asset paths from generated file (flutter_gen)
-if [ -f "lib/gen/assets.gen.dart" ]; then
-  while read -r LINE; do
-    # Extract path
-    PATH_MATCH=$(echo "$LINE" | grep -o "'assets/[^']*'")
-    if [ -n "$PATH_MATCH" ]; then
-      CLEAN_PATH=$(echo "$PATH_MATCH" | tr -d "'")
-      USED_ASSETS+=$'\n'"$CLEAN_PATH"
-    fi
-  done < lib/gen/assets.gen.dart
-fi
-
-# Remove duplicates
-USED_ASSETS=$(echo "$USED_ASSETS" | sort | uniq)
-
-echo "✅ Found $(echo "$USED_ASSETS" | wc -l) used asset references."
+echo "🔍 Scanning for unused assets..."
 echo ""
-echo "🔎 Scanning for unused assets..."
 
+UNUSED_COUNT=0
+DELETED_COUNT=0
+
+# Loop through all files in assets folders
 for FOLDER in "${ASSET_FOLDERS[@]}"; do
   if [ ! -d "$FOLDER" ]; then
-    echo "⚠️ Folder $FOLDER does not exist, skipping."
+    echo "⚠️ Folder $FOLDER not found, skipping..."
     continue
   fi
 
   find "$FOLDER" -type f | while read FILE; do
-    REL_PATH=$(echo "$FILE" | sed 's|^\./||')
-    if echo "$USED_ASSETS" | grep -q "$REL_PATH"; then
-      continue
-    fi
+    FILE_BASENAME=$(basename "$FILE")
+    KEEP=false
 
-    if [ "$MODE" == "dry-run" ]; then
-      echo "❌ Unused: $FILE"
-    else
-      echo "🗑️ Deleting: $FILE"
-      rm -f "$FILE"
+    # Check if used in Dart code (with or without .path)
+    for USED in $USED_ASSETS; do
+      if echo "$USED" | grep -q "$FILE_BASENAME"; then
+        KEEP=true
+        break
+      fi
+    done
+
+    if [ "$KEEP" = false ]; then
+      ((UNUSED_COUNT++))
+      if [ "$MODE" == "dry-run" ]; then
+        echo "❌ Unused: $FILE"
+      elif [ "$MODE" == "delete" ]; then
+        echo "🗑️ Deleting: $FILE"
+        rm -f "$FILE"
+        ((DELETED_COUNT++))
+      fi
     fi
   done
 done
 
 echo ""
-echo "✅ Done!"
+if [ "$MODE" == "dry-run" ]; then
+  echo "🔍 Dry Run Complete → Total unused: $UNUSED_COUNT"
+else
+  echo "✅ Deleted $DELETED_COUNT unused assets"
+fi
