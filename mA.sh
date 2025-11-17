@@ -54,11 +54,9 @@ class_name = sys.argv[1]
 data = json.loads(sys.argv[2])
 
 def fix_field_name(name):
-    # Dart named parameter cannot start with _
     return name[1:] if name.startswith("_") else name
 
 def determine_type(value):
-    # Dynamic fields handling
     if isinstance(value, str):
         return "String", True
     elif isinstance(value, bool):
@@ -68,9 +66,9 @@ def determine_type(value):
     elif isinstance(value, float):
         return "double", True
     elif isinstance(value, list):
-        return "List<dynamic>", False  # list nullable
+        return "List<dynamic>", False
     elif isinstance(value, dict):
-        return "Object", False  # nested object will update
+        return "Object", False
     else:
         return "dynamic", True
 
@@ -84,35 +82,35 @@ def generate_class(name, obj):
         field_name = fix_field_name(key)
         json_key = key
 
-        # Determine type and if required
         dart_type, required = determine_type(value)
         nullable = "" if required else "?"
 
-        # Nested Object
+        # Nested dict
         if isinstance(value, dict):
             nested_name = pascal(key)
             nested_class_def_lines = generate_class(nested_name, value)
             lines.extend(nested_class_def_lines)
             dart_type = f"{nested_name}"
-            nullable = "?"  # nested object can be null
-            from_json_line = f"{field_name}: json.get('{json_key}') and {dart_type}.fromJson(json['{json_key}']) or null,"
+            nullable = "?"
+            from_json_line = f"{field_name}: json['{json_key}'] != None ? {dart_type}.fromJson(json['{json_key}']) : null,"
             to_json_line = f"'{json_key}': {field_name}?.toJson(),"
+        # Nested list of objects
         elif isinstance(value, list) and len(value) > 0 and isinstance(value[0], dict):
             nested_name = pascal(key)
             nested_class_def_lines = generate_class(nested_name, value[0])
             lines.extend(nested_class_def_lines)
             dart_type = f"List<{nested_name}>"
             nullable = "?"
-            from_json_line = f"{field_name}: [ {nested_name}.fromJson(x) for x in json.get('{json_key}', []) ],"
-            to_json_line = f"'{json_key}': [{field_name}?.map((x) => x.toJson()).toList() if {field_name} else []],"
+            from_json_line = f"{field_name}: (json['{json_key}'] as List<dynamic>?)?.map((x) => {nested_name}.fromJson(x)).toList() ?? [],"
+            to_json_line = f"'{json_key}': {field_name}?.map((x) => x.toJson()).toList(),"
+        # Simple list
         elif isinstance(value, list):
-            from_json_line = f"{field_name}: json.get('{json_key}', []),"
+            from_json_line = f"{field_name}: (json['{json_key}'] as List<dynamic>?) ?? [],"
             to_json_line = f"'{json_key}': {field_name},"
         else:
-            from_json_line = f"{field_name}: json.get('{json_key}'),"
+            from_json_line = f"{field_name}: json['{json_key}'],"
             to_json_line = f"'{json_key}': {field_name},"
 
-        # Add field declaration
         fields += f"  final {dart_type}{nullable} {field_name};\n"
         from_json += f"      {from_json_line}\n"
         to_json += f"      {to_json_line}\n"
@@ -146,4 +144,3 @@ dartModel=$(generateModel)
 echo "$dartModel" > "$viewDir/$fileName"
 
 echo "✅ Model generated successfully!"
-echo "📄 Saved to: $viewDir/$fileName"
