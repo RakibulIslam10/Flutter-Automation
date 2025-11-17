@@ -107,7 +107,7 @@ EOF
 
   # ✨ Fancy Success Log
   echo -e "╔════════════════════════════════════════════════════════════╗"
-  echo -e "🚀✨ Successfully generated view: '$viewName' 🎉🧩📱🔗"
+  echo -e "  🚀✨ Successfully Created Your View 🎉🧩📱🔗"
   echo -e "╚════════════════════════════════════════════════════════════╝"
 
 done
