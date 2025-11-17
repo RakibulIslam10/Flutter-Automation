@@ -105,5 +105,7 @@ EOF
   route_code="GetPage(\n    name: Routes.${viewName}Screen,\n    page: () => const ${capitalizedViewName}Screen(),\n    binding: ${capitalizedViewName}Binding(),\n  ),"
   sed -i "/\/\/Page Route List/a $route_code" "$page_file"
 
-  echo "✅ View '$viewName' created with clean structure, route, binding, and widget part links"
+log('╔════════════════════════════════════════════════════════════════════════════════════════════╗');
+log('✨🚀 Successfully generated view: \'$viewName\' 🎉🧩📱🔗');
+log('╚════════════════════════════════════════════════════════════════════════════════════════════╝');
 done
