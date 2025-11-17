@@ -18,7 +18,6 @@ fi
 # Directory setup
 viewDir="lib/views/${viewName}/model"
 mkdir -p "$viewDir"
-
 fileName="${modelName}_model.dart"
 
 # Convert model name like user_info → UserInfoModel
@@ -37,6 +36,7 @@ className=$(to_pascal "$modelName")
 # -------- JSON Input --------
 echo "📥 Paste your JSON below (Finish with CTRL + D):"
 jsonInput=$(cat)
+
 if [ -z "$jsonInput" ]; then
   echo "❌ No JSON input found!"
   exit 1
@@ -44,99 +44,179 @@ fi
 
 # -------- Python Generator --------
 generateModel() {
-python3 - "$className" "$jsonInput" <<'EOF'
-import sys, json, re
+python3 - "$className" "$jsonInput" <<'PYTHON_SCRIPT'
+import sys
+import json
+import re
 
 class_name = sys.argv[1]
-data = json.loads(sys.argv[2])
+json_str = sys.argv[2]
 
-def pascal(text):
-    return ''.join(word.capitalize() for word in re.split(r'_|-|\s', text))
+try:
+    data = json.loads(json_str)
+except json.JSONDecodeError as e:
+    print(f"❌ Invalid JSON: {e}")
+    sys.exit(1)
 
-def fix_field_name(name):
-    return 'id' if name == '_id' else name
+def to_pascal_case(text):
+    """Convert snake_case or kebab-case to PascalCase"""
+    return ''.join(word.capitalize() for word in re.split(r'[_\-\s]', text) if word)
 
-def determine_type(value):
-    if isinstance(value, str):
-        return "String", True
+def to_camel_case(text):
+    """Convert to camelCase for field names"""
+    if text == '_id':
+        return 'id'
+    parts = re.split(r'[_\-\s]', text)
+    return parts[0].lower() + ''.join(word.capitalize() for word in parts[1:])
+
+def singularize(text):
+    """Simple singularization for list items"""
+    if text.endswith('ies'):
+        return text[:-3] + 'y'
+    elif text.endswith('ses'):
+        return text[:-2]
+    elif text.endswith('s'):
+        return text[:-1]
+    return text
+
+def get_dart_type(value, key_name=""):
+    """Determine Dart type from JSON value"""
+    if value is None:
+        return "dynamic?", False
     elif isinstance(value, bool):
-        return "bool", True
+        return "bool", False
     elif isinstance(value, int):
-        return "int", True
+        return "int", False
     elif isinstance(value, float):
-        return "double", True
+        return "double", False
+    elif isinstance(value, str):
+        return "String", False
     elif isinstance(value, list):
-        return "List<dynamic>", False
-    elif isinstance(value, dict):
-        return None, False
-    else:
-        return "dynamic", True
-
-def generate_class(name, obj):
-    lines = []
-    fields = ""
-    from_json = ""
-    to_json = ""
-
-    for key, value in obj.items():
-        field_name = fix_field_name(key)
-        dart_type, required = determine_type(value)
-        nullable = "" if required else "?"
-
-        # Nested dict
-        if isinstance(value, dict):
-            nested_name = pascal(key)
-            lines.extend(generate_class(nested_name, value))
-            dart_type = nested_name
-            nullable = ""
-            from_json_line = f"{field_name}: json['{key}'] != None ? {dart_type}.fromJson(json['{key}']) : null,"
-            to_json_line = f"'{key}': {field_name}?.toJson(),"
-        # List of objects
-        elif isinstance(value, list) and len(value) > 0 and isinstance(value[0], dict):
-            nested_name = pascal(key.rstrip('s'))  # singularize for item class
-            lines.extend(generate_class(nested_name, value[0]))
-            dart_type = f"List<{nested_name}>"
-            nullable = ""
-            from_json_line = f"{field_name}: (json['{key}'] as List<dynamic>?)?.map((x) => {nested_name}.fromJson(x)).toList() ?? [],"
-            to_json_line = f"'{key}': {field_name}.map((x) => x.toJson()).toList(),"
-        # Simple list
-        elif isinstance(value, list):
-            from_json_line = f"{field_name}: (json['{key}'] as List<dynamic>?) ?? [],"
-            to_json_line = f"'{key}': {field_name},"
+        if len(value) == 0:
+            return "List<dynamic>", False
+        elif isinstance(value[0], dict):
+            nested_class = to_pascal_case(singularize(key_name))
+            return f"List<{nested_class}>", True
+        elif isinstance(value[0], str):
+            return "List<String>", False
+        elif isinstance(value[0], int):
+            return "List<int>", False
+        elif isinstance(value[0], bool):
+            return "List<bool>", False
+        elif isinstance(value[0], float):
+            return "List<double>", False
         else:
-            from_json_line = f"{field_name}: json['{key}'],"
-            to_json_line = f"'{key}': {field_name},"
+            return "List<dynamic>", False
+    elif isinstance(value, dict):
+        nested_class = to_pascal_case(key_name)
+        return nested_class, True
+    else:
+        return "dynamic", False
 
-        fields += f"  final {dart_type}{nullable} {field_name};\n"
-        from_json += f"      {from_json_line}\n"
-        to_json += f"      {to_json_line}\n"
+def generate_class(class_name, data, indent=0):
+    """Generate Dart class from JSON object"""
+    if not isinstance(data, dict):
+        return []
+    
+    ind = "  " * indent
+    classes = []
+    fields = []
+    constructor_params = []
+    from_json_lines = []
+    to_json_lines = []
+    
+    for json_key, json_value in data.items():
+        field_name = to_camel_case(json_key)
+        dart_type, is_nested = get_dart_type(json_value, json_key)
+        
+        # Handle nested objects
+        if isinstance(json_value, dict):
+            nested_classes = generate_class(dart_type, json_value, indent)
+            classes.extend(nested_classes)
+            fields.append(f"final {dart_type}? {field_name};")
+            constructor_params.append(f"this.{field_name}")
+            from_json_lines.append(
+                f"{field_name}: json['{json_key}'] != null ? {dart_type}.fromJson(json['{json_key}']) : null"
+            )
+            to_json_lines.append(f"'{json_key}': {field_name}?.toJson()")
+        
+        # Handle list of objects
+        elif isinstance(json_value, list) and len(json_value) > 0 and isinstance(json_value[0], dict):
+            item_class = to_pascal_case(singularize(json_key))
+            nested_classes = generate_class(item_class, json_value[0], indent)
+            classes.extend(nested_classes)
+            fields.append(f"final List<{item_class}>? {field_name};")
+            constructor_params.append(f"this.{field_name}")
+            from_json_lines.append(
+                f"{field_name}: json['{json_key}'] != null ? (json['{json_key}'] as List).map((e) => {item_class}.fromJson(e)).toList() : null"
+            )
+            to_json_lines.append(f"'{json_key}': {field_name}?.map((e) => e.toJson()).toList()")
+        
+        # Handle simple lists
+        elif isinstance(json_value, list):
+            fields.append(f"final {dart_type}? {field_name};")
+            constructor_params.append(f"this.{field_name}")
+            from_json_lines.append(f"{field_name}: json['{json_key}'] != null ? List<dynamic>.from(json['{json_key}']) : null")
+            to_json_lines.append(f"'{json_key}': {field_name}")
+        
+        # Handle primitives and null
+        else:
+            nullable = "?" if json_value is None else ""
+            fields.append(f"final {dart_type}{nullable} {field_name};")
+            constructor_params.append(f"this.{field_name}")
+            from_json_lines.append(f"{field_name}: json['{json_key}']")
+            to_json_lines.append(f"'{json_key}': {field_name}")
+    
+    # Build class string
+    class_str = f"{ind}class {class_name} {{\n"
+    
+    # Fields
+    for field in fields:
+        class_str += f"{ind}  {field}\n"
+    
+    class_str += f"\n{ind}  {class_name}({{\n"
+    for param in constructor_params:
+        class_str += f"{ind}    {param},\n"
+    class_str += f"{ind}  }});\n\n"
+    
+    # fromJson
+    class_str += f"{ind}  factory {class_name}.fromJson(Map<String, dynamic> json) {{\n"
+    class_str += f"{ind}    return {class_name}(\n"
+    for line in from_json_lines:
+        class_str += f"{ind}      {line},\n"
+    class_str += f"{ind}    );\n"
+    class_str += f"{ind}  }}\n\n"
+    
+    # toJson
+    class_str += f"{ind}  Map<String, dynamic> toJson() {{\n"
+    class_str += f"{ind}    return {{\n"
+    for line in to_json_lines:
+        class_str += f"{ind}      {line},\n"
+    class_str += f"{ind}    }};\n"
+    class_str += f"{ind}  }}\n"
+    
+    class_str += f"{ind}}}\n"
+    
+    classes.append(class_str)
+    return classes
 
-    cls = f"""
-class {name} {{
-{fields}
-  {name}({{
-{''.join([f'    required this.{line.split()[2][:-1]},\n' for line in fields.splitlines() if line.strip()])}  }});
+# Generate all classes
+all_classes = generate_class(class_name, data)
 
-  factory {name}.fromJson(Map<String, dynamic> json) => {name}(
-{from_json}
-  );
-
-  Map<String, dynamic> toJson() => {{
-{to_json}
-  }};
-}}
-"""
-    lines.append(cls)
-    return lines
-
-output = generate_class(class_name, data)
-print("\n".join(output))
-EOF
+# Print output
+print("\n".join(all_classes))
+PYTHON_SCRIPT
 }
 
 # -------- Write Model to File --------
 echo "⚙️ Generating model..."
 dartModel=$(generateModel)
-echo "$dartModel" > "$viewDir/$fileName"
 
-echo "✅ Model generated successfully!"
+if [ -z "$dartModel" ]; then
+  echo "❌ Model generation failed!"
+  exit 1
+fi
+
+echo "$dartModel" > "$viewDir/$fileName"
+echo "✅ Model generated successfully at: $viewDir/$fileName"
+echo "📄 File: $fileName"
