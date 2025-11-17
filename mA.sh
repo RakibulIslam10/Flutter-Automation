@@ -1,40 +1,48 @@
 #!/bin/bash
 
 # ============================
+# Flutter Model Generator (View-based)
 # ============================
 
-read -p "📂 Enter View Name: " viewName
-read -p "📦 Enter Model Name: " modelName
+echo "📂 Enter View Name:"
+read viewName
 
-if [ -z "$viewName" ] || [ -z "$modelName" ]; then
-  echo "❌ View name or Model name missing!"
+if [ -z "$viewName" ]; then
+  echo "❌ View name missing!"
   exit 1
 fi
 
-# Directory structure
+echo "📦 Enter Model Name:"
+read modelName
+
+if [ -z "$modelName" ]; then
+  echo "❌ Model name missing!"
+  exit 1
+fi
+
+# Directory structure setup
 viewDir="lib/views/${viewName}/model"
 mkdir -p "$viewDir"
 
 fileName="${modelName}_model.dart"
 
-# Convert model name to PascalCase + Model
+# Convert model name → PascalCase + Model suffix
 className="$(echo $modelName | sed -r 's/(^|-)(\w)/\U\2/g')Model"
 
-echo "📥 Paste your JSON below (finish with CTRL + D):"
-
+echo "📥 Paste your JSON below (Finish with CTRL + D):"
 jsonInput=$(cat)
 
 if [ -z "$jsonInput" ]; then
-  echo "❌ No JSON found!"
+  echo "❌ No JSON input found!"
   exit 1
 fi
 
-# ----- Dart Model Generator -----
+# ---------- Python Generator ----------
 generateModel() {
 python3 - "$className" "$jsonInput" << 'EOF'
 import sys, json, re
 
-def pascal_case(text):
+def pascal(text):
     return ''.join(word.capitalize() for word in re.split(r'_|-|\s', text))
 
 class_name = sys.argv[1]
@@ -50,7 +58,7 @@ def generate_class(name, obj):
         field_name = key
         json_key = key
 
-        # Determine type
+        # Determine dart type
         if isinstance(value, str):
             dart_type = "String"
         elif isinstance(value, bool):
@@ -61,13 +69,13 @@ def generate_class(name, obj):
             dart_type = "double"
         elif isinstance(value, list):
             if len(value) > 0 and isinstance(value[0], dict):
-                sub = pascal_case(key)
+                sub = pascal(key)
                 lines.extend(generate_class(sub, value[0]))
                 dart_type = f"List<{sub}>"
             else:
                 dart_type = "List<dynamic>"
         elif isinstance(value, dict):
-            sub = pascal_case(key)
+            sub = pascal(key)
             lines.extend(generate_class(sub, value))
             dart_type = sub
         else:
@@ -82,7 +90,7 @@ def generate_class(name, obj):
                 from_json += f"      {field_name}: List<{base}>.from(json['{json_key}'] ?? []),\n"
             else:
                 from_json += f"      {field_name}: json['{json_key}'] != null ? List<{base}>.from(json['{json_key}'].map((x) => {base}.fromJson(x))) : [],\n"
-        elif dart_type[0].isupper() and dart_type not in ["String","bool","int","double"]:
+        elif dart_type[0].isupper() and dart_type not in ["String","int","double","bool"]:
             from_json += f"      {field_name}: json['{json_key}'] != null ? {dart_type}.fromJson(json['{json_key}']) : null,\n"
         else:
             from_json += f"      {field_name}: json['{json_key}'],\n"
@@ -94,7 +102,7 @@ def generate_class(name, obj):
                 to_json += f"      '{json_key}': {field_name},\n"
             else:
                 to_json += f"      '{json_key}': {field_name}.map((x) => x.toJson()).toList(),\n"
-        elif dart_type[0].isupper() and dart_type not in ["String","bool","int","double"]:
+        elif dart_type[0].isupper() and dart_type not in ["String","int","double","bool"]:
             to_json += f"      '{json_key}': {field_name}?.toJson(),\n"
         else:
             to_json += f"      '{json_key}': {field_name},\n"
@@ -103,7 +111,7 @@ def generate_class(name, obj):
 class {name} {{
 {fields}
   {name}({{
-{''.join([f'    required this.{f.split()[2][:-1]},\n' for f in fields.splitlines() if f.strip()])}  }});
+{''.join([f'    required this.{line.split()[2][:-1]},\n' for line in fields.splitlines() if line.strip()])}  }});
 
   factory {name}.fromJson(Map<String, dynamic> json) => {name}(
 {from_json}
@@ -128,3 +136,4 @@ dartModel=$(generateModel)
 echo "$dartModel" > "$viewDir/$fileName"
 
 echo "✅ Model generated successfully!"
+echo "📄 Saved to: $viewDir/$fileName"
