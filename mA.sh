@@ -67,6 +67,11 @@ def to_camel_case(text):
     if text == '_id':
         return 'id'
     parts = re.split(r'[_\-\s]', text)
+    if not parts:
+        return text
+    # Handle camelCase from JSON (like fullName)
+    if text[0].islower() and any(c.isupper() for c in text):
+        return text
     return parts[0].lower() + ''.join(word.capitalize() for word in parts[1:])
 
 def singularize(text):
@@ -82,7 +87,7 @@ def singularize(text):
 def get_dart_type(value, key_name=""):
     """Determine Dart type from JSON value"""
     if value is None:
-        return "dynamic?", False
+        return "dynamic", True  # Nullable
     elif isinstance(value, bool):
         return "bool", False
     elif isinstance(value, int):
@@ -93,7 +98,7 @@ def get_dart_type(value, key_name=""):
         return "String", False
     elif isinstance(value, list):
         if len(value) == 0:
-            return "List<dynamic>", False
+            return "List<dynamic>", True
         elif isinstance(value[0], dict):
             nested_class = to_pascal_case(singularize(key_name))
             return f"List<{nested_class}>", True
@@ -109,9 +114,9 @@ def get_dart_type(value, key_name=""):
             return "List<dynamic>", False
     elif isinstance(value, dict):
         nested_class = to_pascal_case(key_name)
-        return nested_class, True
+        return nested_class, True  # Nested objects are nullable
     else:
-        return "dynamic", False
+        return "dynamic", True
 
 def generate_class(class_name, data, indent=0):
     """Generate Dart class from JSON object"""
@@ -127,14 +132,16 @@ def generate_class(class_name, data, indent=0):
     
     for json_key, json_value in data.items():
         field_name = to_camel_case(json_key)
-        dart_type, is_nested = get_dart_type(json_value, json_key)
+        dart_type, is_nullable = get_dart_type(json_value, json_key)
         
         # Handle nested objects
         if isinstance(json_value, dict):
             nested_classes = generate_class(dart_type, json_value, indent)
             classes.extend(nested_classes)
-            fields.append(f"final {dart_type}? {field_name};")
-            constructor_params.append(f"this.{field_name}")
+            
+            nullable_mark = "?" if is_nullable else ""
+            fields.append(f"final {dart_type}{nullable_mark} {field_name};")
+            constructor_params.append(f"required this.{field_name}" if not is_nullable else f"this.{field_name}")
             from_json_lines.append(
                 f"{field_name}: json['{json_key}'] != null ? {dart_type}.fromJson(json['{json_key}']) : null"
             )
@@ -145,7 +152,9 @@ def generate_class(class_name, data, indent=0):
             item_class = to_pascal_case(singularize(json_key))
             nested_classes = generate_class(item_class, json_value[0], indent)
             classes.extend(nested_classes)
-            fields.append(f"final List<{item_class}>? {field_name};")
+            
+            nullable_mark = "?" if is_nullable else ""
+            fields.append(f"final List<{item_class}>{nullable_mark} {field_name};")
             constructor_params.append(f"this.{field_name}")
             from_json_lines.append(
                 f"{field_name}: json['{json_key}'] != null ? (json['{json_key}'] as List).map((e) => {item_class}.fromJson(e)).toList() : null"
@@ -154,16 +163,19 @@ def generate_class(class_name, data, indent=0):
         
         # Handle simple lists
         elif isinstance(json_value, list):
-            fields.append(f"final {dart_type}? {field_name};")
+            nullable_mark = "?" if is_nullable else ""
+            fields.append(f"final {dart_type}{nullable_mark} {field_name};")
             constructor_params.append(f"this.{field_name}")
-            from_json_lines.append(f"{field_name}: json['{json_key}'] != null ? List<dynamic>.from(json['{json_key}']) : null")
+            from_json_lines.append(f"{field_name}: json['{json_key}'] != null ? List.from(json['{json_key}']) : null")
             to_json_lines.append(f"'{json_key}': {field_name}")
         
-        # Handle primitives and null
+        # Handle primitives
         else:
-            nullable = "?" if json_value is None else ""
-            fields.append(f"final {dart_type}{nullable} {field_name};")
-            constructor_params.append(f"this.{field_name}")
+            nullable_mark = "?" if is_nullable else ""
+            required_mark = "required " if not is_nullable else ""
+            
+            fields.append(f"final {dart_type}{nullable_mark} {field_name};")
+            constructor_params.append(f"{required_mark}this.{field_name}")
             from_json_lines.append(f"{field_name}: json['{json_key}']")
             to_json_lines.append(f"'{json_key}': {field_name}")
     
@@ -174,12 +186,13 @@ def generate_class(class_name, data, indent=0):
     for field in fields:
         class_str += f"{ind}  {field}\n"
     
+    # Constructor
     class_str += f"\n{ind}  {class_name}({{\n"
     for param in constructor_params:
         class_str += f"{ind}    {param},\n"
     class_str += f"{ind}  }});\n\n"
     
-    # fromJson
+    # fromJson factory
     class_str += f"{ind}  factory {class_name}.fromJson(Map<String, dynamic> json) {{\n"
     class_str += f"{ind}    return {class_name}(\n"
     for line in from_json_lines:
@@ -187,7 +200,7 @@ def generate_class(class_name, data, indent=0):
     class_str += f"{ind}    );\n"
     class_str += f"{ind}  }}\n\n"
     
-    # toJson
+    # toJson method
     class_str += f"{ind}  Map<String, dynamic> toJson() {{\n"
     class_str += f"{ind}    return {{\n"
     for line in to_json_lines:
