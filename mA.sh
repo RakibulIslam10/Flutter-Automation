@@ -1,45 +1,50 @@
 #!/bin/bash
+set -euo pipefail
 
-# ============================
-# Flutter Model Generator (View-based)
-# ============================
-
-echo "📂 Enter View Name:"
-read viewName
-
+# -------- Input View Name --------
+read -p "📂 Enter View Name: " viewName
 if [ -z "$viewName" ]; then
   echo "❌ View name missing!"
   exit 1
 fi
 
-echo "📦 Enter Model Name:"
-read modelName
-
+# -------- Input Model Name --------
+read -p "📦 Enter Model Name: " modelName
 if [ -z "$modelName" ]; then
   echo "❌ Model name missing!"
   exit 1
 fi
 
-# Directory structure setup
+# Directory setup
 viewDir="lib/views/${viewName}/model"
 mkdir -p "$viewDir"
 
 fileName="${modelName}_model.dart"
 
-# Convert model name → PascalCase + Model suffix
-className="$(echo $modelName | sed -r 's/(^|-)(\w)/\U\2/g')Model"
+# Convert model name like user_info → UserInfoModel
+to_pascal() {
+  local input="$1"
+  local output=""
+  IFS='_-' read -ra parts <<< "$input"
+  for part in "${parts[@]}"; do
+    output+="${part^}"
+  done
+  echo "${output}Model"
+}
 
+className=$(to_pascal "$modelName")
+
+# -------- JSON Input --------
 echo "📥 Paste your JSON below (Finish with CTRL + D):"
 jsonInput=$(cat)
-
 if [ -z "$jsonInput" ]; then
   echo "❌ No JSON input found!"
   exit 1
 fi
 
-# ---------- Python Generator ----------
+# -------- Python Generator --------
 generateModel() {
-python3 - "$className" "$jsonInput" << 'EOF'
+python3 - "$className" "$jsonInput" <<'EOF'
 import sys, json, re
 
 def pascal(text):
@@ -48,6 +53,27 @@ def pascal(text):
 class_name = sys.argv[1]
 data = json.loads(sys.argv[2])
 
+def fix_field_name(name):
+    # Dart named parameter cannot start with _
+    return name[1:] if name.startswith("_") else name
+
+def determine_type(value):
+    # Dynamic fields handling
+    if isinstance(value, str):
+        return "String", True
+    elif isinstance(value, bool):
+        return "bool", True
+    elif isinstance(value, int):
+        return "int", True
+    elif isinstance(value, float):
+        return "double", True
+    elif isinstance(value, list):
+        return "List<dynamic>", False  # list nullable
+    elif isinstance(value, dict):
+        return "Object", False  # nested object will update
+    else:
+        return "dynamic", True
+
 def generate_class(name, obj):
     lines = []
     fields = ""
@@ -55,63 +81,47 @@ def generate_class(name, obj):
     to_json = ""
 
     for key, value in obj.items():
-        field_name = key
+        field_name = fix_field_name(key)
         json_key = key
 
-        # Determine dart type
-        if isinstance(value, str):
-            dart_type = "String"
-        elif isinstance(value, bool):
-            dart_type = "bool"
-        elif isinstance(value, int):
-            dart_type = "int"
-        elif isinstance(value, float):
-            dart_type = "double"
+        # Determine type and if required
+        dart_type, required = determine_type(value)
+        nullable = "" if required else "?"
+
+        # Nested Object
+        if isinstance(value, dict):
+            nested_name = pascal(key)
+            nested_class_def_lines = generate_class(nested_name, value)
+            lines.extend(nested_class_def_lines)
+            dart_type = f"{nested_name}"
+            nullable = "?"  # nested object can be null
+            from_json_line = f"{field_name}: json.get('{json_key}') and {dart_type}.fromJson(json['{json_key}']) or null,"
+            to_json_line = f"'{json_key}': {field_name}?.toJson(),"
+        elif isinstance(value, list) and len(value) > 0 and isinstance(value[0], dict):
+            nested_name = pascal(key)
+            nested_class_def_lines = generate_class(nested_name, value[0])
+            lines.extend(nested_class_def_lines)
+            dart_type = f"List<{nested_name}>"
+            nullable = "?"
+            from_json_line = f"{field_name}: [ {nested_name}.fromJson(x) for x in json.get('{json_key}', []) ],"
+            to_json_line = f"'{json_key}': [{field_name}?.map((x) => x.toJson()).toList() if {field_name} else []],"
         elif isinstance(value, list):
-            if len(value) > 0 and isinstance(value[0], dict):
-                sub = pascal(key)
-                lines.extend(generate_class(sub, value[0]))
-                dart_type = f"List<{sub}>"
-            else:
-                dart_type = "List<dynamic>"
-        elif isinstance(value, dict):
-            sub = pascal(key)
-            lines.extend(generate_class(sub, value))
-            dart_type = sub
+            from_json_line = f"{field_name}: json.get('{json_key}', []),"
+            to_json_line = f"'{json_key}': {field_name},"
         else:
-            dart_type = "dynamic"
+            from_json_line = f"{field_name}: json.get('{json_key}'),"
+            to_json_line = f"'{json_key}': {field_name},"
 
-        fields += f"  final {dart_type} {field_name};\n"
-
-        # fromJson
-        if "List<" in dart_type:
-            base = dart_type.replace("List<","").replace(">","")
-            if base in ["String","int","double","bool","dynamic"]:
-                from_json += f"      {field_name}: List<{base}>.from(json['{json_key}'] ?? []),\n"
-            else:
-                from_json += f"      {field_name}: json['{json_key}'] != null ? List<{base}>.from(json['{json_key}'].map((x) => {base}.fromJson(x))) : [],\n"
-        elif dart_type[0].isupper() and dart_type not in ["String","int","double","bool"]:
-            from_json += f"      {field_name}: json['{json_key}'] != null ? {dart_type}.fromJson(json['{json_key}']) : null,\n"
-        else:
-            from_json += f"      {field_name}: json['{json_key}'],\n"
-
-        # toJson
-        if "List<" in dart_type:
-            base = dart_type.replace("List<","").replace(">","")
-            if base in ["String","int","double","bool","dynamic"]:
-                to_json += f"      '{json_key}': {field_name},\n"
-            else:
-                to_json += f"      '{json_key}': {field_name}.map((x) => x.toJson()).toList(),\n"
-        elif dart_type[0].isupper() and dart_type not in ["String","int","double","bool"]:
-            to_json += f"      '{json_key}': {field_name}?.toJson(),\n"
-        else:
-            to_json += f"      '{json_key}': {field_name},\n"
+        # Add field declaration
+        fields += f"  final {dart_type}{nullable} {field_name};\n"
+        from_json += f"      {from_json_line}\n"
+        to_json += f"      {to_json_line}\n"
 
     cls = f"""
 class {name} {{
 {fields}
   {name}({{
-{''.join([f'    required this.{line.split()[2][:-1]},\n' for line in fields.splitlines() if line.strip()])}  }});
+{''.join([f'    required this.{line.split()[2][:-1]},\n' for line in fields.splitlines() if line.strip() and '?' not in line])}  }});
 
   factory {name}.fromJson(Map<String, dynamic> json) => {name}(
 {from_json}
@@ -130,9 +140,9 @@ print("\n".join(output))
 EOF
 }
 
+# -------- Write Model to File --------
 echo "⚙️ Generating model..."
 dartModel=$(generateModel)
-
 echo "$dartModel" > "$viewDir/$fileName"
 
 echo "✅ Model generated successfully!"
