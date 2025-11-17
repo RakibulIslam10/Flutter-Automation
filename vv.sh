@@ -28,8 +28,8 @@ class ${capitalizedViewName}Controller extends GetxController {
 }
 EOF
 
-# 📱 Mobile Screen File
-cat <<EOF > "$base_dir/screen/${viewName}_screen_mobile.dart"
+  # 📱 Mobile Screen File
+  cat <<EOF > "$base_dir/screen/${viewName}_screen_mobile.dart"
 part of '${viewName}_screen.dart';
 
 class ${capitalizedViewName}ScreenMobile extends GetView<${capitalizedViewName}Controller> {
@@ -105,7 +105,9 @@ EOF
   route_code="GetPage(\n    name: Routes.${viewName}Screen,\n    page: () => const ${capitalizedViewName}Screen(),\n    binding: ${capitalizedViewName}Binding(),\n  ),"
   sed -i "/\/\/Page Route List/a $route_code" "$page_file"
 
-log('╔════════════════════════════════════════════════════════════════════════════════════════════╗');
-log('✨🚀 Successfully generated view: \'$viewName\' 🎉🧩📱🔗');
-log('╚════════════════════════════════════════════════════════════════════════════════════════════╝');
+  # ✨ Fancy Success Log
+  echo -e "╔════════════════════════════════════════════════════════════╗"
+  echo -e "🚀✨ Successfully generated view: '$viewName' 🎉🧩📱🔗"
+  echo -e "╚════════════════════════════════════════════════════════════╝"
+
 done
