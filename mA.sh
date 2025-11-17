@@ -82,23 +82,23 @@ def generate_class(name, obj):
         field_name = fix_field_name(key)
         dart_type, required = determine_type(value)
         nullable = "" if required else "?"
-        
+
         # Nested dict
         if isinstance(value, dict):
             nested_name = pascal(key)
             lines.extend(generate_class(nested_name, value))
             dart_type = nested_name
-            nullable = "?"
+            nullable = ""
             from_json_line = f"{field_name}: json['{key}'] != None ? {dart_type}.fromJson(json['{key}']) : null,"
             to_json_line = f"'{key}': {field_name}?.toJson(),"
         # List of objects
         elif isinstance(value, list) and len(value) > 0 and isinstance(value[0], dict):
-            nested_name = pascal(key)
+            nested_name = pascal(key.rstrip('s'))  # singularize for item class
             lines.extend(generate_class(nested_name, value[0]))
             dart_type = f"List<{nested_name}>"
-            nullable = "?"
+            nullable = ""
             from_json_line = f"{field_name}: (json['{key}'] as List<dynamic>?)?.map((x) => {nested_name}.fromJson(x)).toList() ?? [],"
-            to_json_line = f"'{key}': {field_name}?.map((x) => x.toJson()).toList(),"
+            to_json_line = f"'{key}': {field_name}.map((x) => x.toJson()).toList(),"
         # Simple list
         elif isinstance(value, list):
             from_json_line = f"{field_name}: (json['{key}'] as List<dynamic>?) ?? [],"
@@ -115,7 +115,7 @@ def generate_class(name, obj):
 class {name} {{
 {fields}
   {name}({{
-{''.join([f'    required this.{line.split()[2][:-1]},\n' for line in fields.splitlines() if line.strip() and '?' not in line])}  }});
+{''.join([f'    required this.{line.split()[2][:-1]},\n' for line in fields.splitlines() if line.strip()])}  }});
 
   factory {name}.fromJson(Map<String, dynamic> json) => {name}(
 {from_json}
@@ -140,4 +140,3 @@ dartModel=$(generateModel)
 echo "$dartModel" > "$viewDir/$fileName"
 
 echo "✅ Model generated successfully!"
-echo "📄 Saved to: $viewDir/$fileName"
