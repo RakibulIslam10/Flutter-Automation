@@ -42,6 +42,8 @@ dependencies:
   intl:
   cached_network_image:
   country_picker: ^2.0.27
+  shadify: ^1.0.1
+
 
   http:
 
