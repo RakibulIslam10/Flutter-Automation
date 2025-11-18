@@ -34,8 +34,8 @@ to_pascal() {
 className=$(to_pascal "$modelName")
 
 # -------- JSON Input --------
-echo "📥 Paste your JSON (single line, press Enter when done):"
-read -r jsonInput
+echo "📥 Paste your JSON below (Finish with CTRL + D):"
+jsonInput=$(cat)
 
 if [ -z "$jsonInput" ]; then
   echo "❌ No JSON input found!"
@@ -59,19 +59,23 @@ except json.JSONDecodeError as e:
     sys.exit(1)
 
 def to_pascal_case(text):
+    """Convert snake_case or kebab-case to PascalCase"""
     return ''.join(word.capitalize() for word in re.split(r'[_\-\s]', text) if word)
 
 def to_camel_case(text):
+    """Convert to camelCase for field names"""
     if text == '_id':
         return 'id'
     parts = re.split(r'[_\-\s]', text)
     if not parts:
         return text
+    # Handle camelCase from JSON (like fullName)
     if text[0].islower() and any(c.isupper() for c in text):
         return text
     return parts[0].lower() + ''.join(word.capitalize() for word in parts[1:])
 
 def singularize(text):
+    """Simple singularization for list items"""
     if text.endswith('ies'):
         return text[:-3] + 'y'
     elif text.endswith('ses'):
@@ -81,8 +85,9 @@ def singularize(text):
     return text
 
 def get_dart_type(value, key_name=""):
+    """Determine Dart type from JSON value"""
     if value is None:
-        return "dynamic", True
+        return "dynamic", True  # Nullable
     elif isinstance(value, bool):
         return "bool", False
     elif isinstance(value, int):
@@ -109,11 +114,12 @@ def get_dart_type(value, key_name=""):
             return "List<dynamic>", False
     elif isinstance(value, dict):
         nested_class = to_pascal_case(key_name)
-        return nested_class, True
+        return nested_class, True  # Nested objects are nullable
     else:
         return "dynamic", True
 
 def generate_class(class_name, data, indent=0):
+    """Generate Dart class from JSON object"""
     if not isinstance(data, dict):
         return []
     
@@ -128,53 +134,65 @@ def generate_class(class_name, data, indent=0):
         field_name = to_camel_case(json_key)
         dart_type, is_nullable = get_dart_type(json_value, json_key)
         
+        # Handle nested objects
         if isinstance(json_value, dict):
             nested_classes = generate_class(dart_type, json_value, indent)
             classes.extend(nested_classes)
+            
             nullable_mark = "?" if is_nullable else ""
             fields.append(f"final {dart_type}{nullable_mark} {field_name};")
             constructor_params.append(f"required this.{field_name}" if not is_nullable else f"this.{field_name}")
             from_json_lines.append(
-                f"{field_name}: json['{json_key}'] != None ? {dart_type}.fromJson(json['{json_key}']) : None"
+                f"{field_name}: json['{json_key}'] != null ? {dart_type}.fromJson(json['{json_key}']) : null"
             )
             to_json_lines.append(f"'{json_key}': {field_name}?.toJson()")
         
+        # Handle list of objects
         elif isinstance(json_value, list) and len(json_value) > 0 and isinstance(json_value[0], dict):
             item_class = to_pascal_case(singularize(json_key))
             nested_classes = generate_class(item_class, json_value[0], indent)
             classes.extend(nested_classes)
+            
             nullable_mark = "?" if is_nullable else ""
             fields.append(f"final List<{item_class}>{nullable_mark} {field_name};")
             constructor_params.append(f"this.{field_name}")
             from_json_lines.append(
-                f"{field_name}: json['{json_key}'] != None ? [ {item_class}.fromJson(e) for e in json['{json_key}'] ] : None"
+                f"{field_name}: json['{json_key}'] != null ? (json['{json_key}'] as List).map((e) => {item_class}.fromJson(e)).toList() : null"
             )
             to_json_lines.append(f"'{json_key}': {field_name}?.map((e) => e.toJson()).toList()")
         
+        # Handle simple lists
         elif isinstance(json_value, list):
             nullable_mark = "?" if is_nullable else ""
             fields.append(f"final {dart_type}{nullable_mark} {field_name};")
             constructor_params.append(f"this.{field_name}")
-            from_json_lines.append(f"{field_name}: json['{json_key}'] != None ? list(json['{json_key}']) : None")
+            from_json_lines.append(f"{field_name}: json['{json_key}'] != null ? List.from(json['{json_key}']) : null")
             to_json_lines.append(f"'{json_key}': {field_name}")
         
+        # Handle primitives
         else:
             nullable_mark = "?" if is_nullable else ""
             required_mark = "required " if not is_nullable else ""
+            
             fields.append(f"final {dart_type}{nullable_mark} {field_name};")
             constructor_params.append(f"{required_mark}this.{field_name}")
             from_json_lines.append(f"{field_name}: json['{json_key}']")
             to_json_lines.append(f"'{json_key}': {field_name}")
     
+    # Build class string
     class_str = f"{ind}class {class_name} {{\n"
+    
+    # Fields
     for field in fields:
         class_str += f"{ind}  {field}\n"
     
+    # Constructor
     class_str += f"\n{ind}  {class_name}({{\n"
     for param in constructor_params:
         class_str += f"{ind}    {param},\n"
     class_str += f"{ind}  }});\n\n"
     
+    # fromJson factory
     class_str += f"{ind}  factory {class_name}.fromJson(Map<String, dynamic> json) {{\n"
     class_str += f"{ind}    return {class_name}(\n"
     for line in from_json_lines:
@@ -182,6 +200,7 @@ def generate_class(class_name, data, indent=0):
     class_str += f"{ind}    );\n"
     class_str += f"{ind}  }}\n\n"
     
+    # toJson method
     class_str += f"{ind}  Map<String, dynamic> toJson() {{\n"
     class_str += f"{ind}    return {{\n"
     for line in to_json_lines:
@@ -194,7 +213,10 @@ def generate_class(class_name, data, indent=0):
     classes.append(class_str)
     return classes
 
+# Generate all classes
 all_classes = generate_class(class_name, data)
+
+# Print output
 print("\n".join(all_classes))
 PYTHON_SCRIPT
 }
