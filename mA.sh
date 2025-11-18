@@ -34,8 +34,8 @@ to_pascal() {
 className=$(to_pascal "$modelName")
 
 # -------- JSON Input --------
-echo "📥 Paste your JSON below (Press ENTER when done):"
-read -r -d '' jsonInput || true
+echo "📥 Paste your JSON (single line, press Enter when done):"
+read -r jsonInput
 
 if [ -z "$jsonInput" ]; then
   echo "❌ No JSON input found!"
@@ -59,11 +59,9 @@ except json.JSONDecodeError as e:
     sys.exit(1)
 
 def to_pascal_case(text):
-    """Convert snake_case or kebab-case to PascalCase"""
     return ''.join(word.capitalize() for word in re.split(r'[_\-\s]', text) if word)
 
 def to_camel_case(text):
-    """Convert to camelCase for field names"""
     if text == '_id':
         return 'id'
     parts = re.split(r'[_\-\s]', text)
@@ -74,7 +72,6 @@ def to_camel_case(text):
     return parts[0].lower() + ''.join(word.capitalize() for word in parts[1:])
 
 def singularize(text):
-    """Simple singularization for list items"""
     if text.endswith('ies'):
         return text[:-3] + 'y'
     elif text.endswith('ses'):
@@ -84,7 +81,6 @@ def singularize(text):
     return text
 
 def get_dart_type(value, key_name=""):
-    """Determine Dart type from JSON value"""
     if value is None:
         return "dynamic", True
     elif isinstance(value, bool):
@@ -135,7 +131,6 @@ def generate_class(class_name, data, indent=0):
         if isinstance(json_value, dict):
             nested_classes = generate_class(dart_type, json_value, indent)
             classes.extend(nested_classes)
-            
             nullable_mark = "?" if is_nullable else ""
             fields.append(f"final {dart_type}{nullable_mark} {field_name};")
             constructor_params.append(f"required this.{field_name}" if not is_nullable else f"this.{field_name}")
@@ -148,7 +143,6 @@ def generate_class(class_name, data, indent=0):
             item_class = to_pascal_case(singularize(json_key))
             nested_classes = generate_class(item_class, json_value[0], indent)
             classes.extend(nested_classes)
-            
             nullable_mark = "?" if is_nullable else ""
             fields.append(f"final List<{item_class}>{nullable_mark} {field_name};")
             constructor_params.append(f"this.{field_name}")
@@ -167,7 +161,6 @@ def generate_class(class_name, data, indent=0):
         else:
             nullable_mark = "?" if is_nullable else ""
             required_mark = "required " if not is_nullable else ""
-            
             fields.append(f"final {dart_type}{nullable_mark} {field_name};")
             constructor_params.append(f"{required_mark}this.{field_name}")
             from_json_lines.append(f"{field_name}: json['{json_key}']")
