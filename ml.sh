@@ -29,6 +29,8 @@ dependencies:
   shimmer:
   url_launcher: ^6.3.1
   pin_code_fields:
+  shadify: ^1.0.1
+  http:
   loading_animation_widget:
   http_parser: ^4.0.2
   mime: ^1.0.4
@@ -42,10 +44,7 @@ dependencies:
   intl:
   cached_network_image:
   country_picker: ^2.0.27
-  shadify: ^1.0.1
 
-
-  http:
 
 dev_dependencies:
   change_app_package_name: ^1.4.0
@@ -57,9 +56,8 @@ dev_dependencies:
   build_runner:
   flutter_gen_runner:
   
-  # dart run build_runner build
   # dart run rename_app:main all="My App Name"
-  # flutter pub run change_app_package_name:main net.appdevs.carbo
+  # flutter pub run change_app_package_name:main com.clint_name.app_Name
 
 flutter:
   uses-material-design: true
@@ -70,4 +68,6 @@ flutter:
     - assets/dummy/
 EOF
 
-echo "✅ pubspec.yaml generated for project '$PROJECT_NAME'"
+echo "╔════════════════════════════════════════════════════════════╗"
+echo "    🚀✨ Successfully Clean Rewirte Your Yaml 🎉"
+echo "╚════════════════════════════════════════════════════════════╝"
