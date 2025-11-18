@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "📁 Creating YOUR CODE API METHOD..."
+echo "📁 Write YOUR CODE API End Point..."
 
 BASE_DIR="lib/core/api/end_point"
 
