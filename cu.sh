@@ -200,7 +200,7 @@ echo "✅ app_storage_model.dart created"
 
 # space.dart
 cat > "$BASE_DIR/core/utils/space.dart" <<EOF
-import 'package:e_commerce/core/utils/basic_import.dart';
+import 'basic_import.dart';
 
 
 class Space {
