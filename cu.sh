@@ -604,7 +604,13 @@ final ThemeData lightThemeData = ThemeData.light().copyWith(
   dividerColor: Colors.transparent,
   colorScheme: ColorScheme.light(tertiary: CustomColors.tertiary),
   scaffoldBackgroundColor: CustomColors.whiteColor,
-  appBarTheme: AppBarTheme(systemOverlayStyle: SystemUiOverlayStyle.light),
+  appBarTheme: AppBarTheme(
+    systemOverlayStyle: SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+      statusBarBrightness: Brightness.light,
+    ),
+  ),
   textTheme: ThemeData.light().textTheme.apply(
     // fontFamily: GoogleFonts.montserrat().fontFamily,
   ),
@@ -625,6 +631,13 @@ final ThemeData darkThemeData = ThemeData.dark().copyWith(
   colorScheme: ColorScheme.dark(surface: CustomColors.tertiaryDark),
   scaffoldBackgroundColor: CustomColors.backgroundDark,
   brightness: Brightness.dark,
+    appBarTheme: AppBarTheme(
+    systemOverlayStyle: SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark, 
+      statusBarBrightness: Brightness.light,
+    ),
+  ),
   textTheme: ThemeData.dark().textTheme.apply(
     // fontFamily: GoogleFonts.inter().fontFamily,
   ),
