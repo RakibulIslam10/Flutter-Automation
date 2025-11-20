@@ -118,17 +118,38 @@ def get_dart_type(value, key_name=""):
     else:
         return "dynamic", True
 
-def generate_class(class_name, data, indent=0):
-    """Generate Dart class from JSON object"""
-    if not isinstance(data, dict):
-        return []
+def collect_nested_classes(data, parent_class=""):
+    """Collect all nested class definitions in order"""
+    nested_classes = []
     
-    ind = "  " * indent
-    classes = []
+    if not isinstance(data, dict):
+        return nested_classes
+    
+    for json_key, json_value in data.items():
+        # Handle nested objects
+        if isinstance(json_value, dict):
+            nested_class_name = to_pascal_case(json_key)
+            # Recursively collect nested classes first
+            nested_classes.extend(collect_nested_classes(json_value, nested_class_name))
+            nested_classes.append((nested_class_name, json_value))
+        
+        # Handle list of objects
+        elif isinstance(json_value, list) and len(json_value) > 0 and isinstance(json_value[0], dict):
+            item_class = to_pascal_case(singularize(json_key))
+            # Recursively collect nested classes first
+            nested_classes.extend(collect_nested_classes(json_value[0], item_class))
+            nested_classes.append((item_class, json_value[0]))
+    
+    return nested_classes
+
+def generate_class_code(class_name, data):
+    """Generate Dart class code from JSON object"""
+    if not isinstance(data, dict):
+        return ""
+    
     fields = []
     constructor_params = []
     from_json_lines = []
-    to_json_lines = []
     
     for json_key, json_value in data.items():
         field_name = to_camel_case(json_key)
@@ -136,38 +157,31 @@ def generate_class(class_name, data, indent=0):
         
         # Handle nested objects
         if isinstance(json_value, dict):
-            nested_classes = generate_class(dart_type, json_value, indent)
-            classes.extend(nested_classes)
-            
             nullable_mark = "?" if is_nullable else ""
             fields.append(f"final {dart_type}{nullable_mark} {field_name};")
-            constructor_params.append(f"required this.{field_name}" if not is_nullable else f"this.{field_name}")
+            constructor_params.append(f"this.{field_name}" if is_nullable else f"required this.{field_name}")
             from_json_lines.append(
-                f"{field_name}: json['{json_key}'] != null ? {dart_type}.fromJson(json['{json_key}']) : null"
+                f"{field_name}: json['{json_key}'] != null\n          ? {dart_type}.fromJson(json['{json_key}'])\n          : null"
             )
-            to_json_lines.append(f"'{json_key}': {field_name}?.toJson()")
         
         # Handle list of objects
         elif isinstance(json_value, list) and len(json_value) > 0 and isinstance(json_value[0], dict):
             item_class = to_pascal_case(singularize(json_key))
-            nested_classes = generate_class(item_class, json_value[0], indent)
-            classes.extend(nested_classes)
-            
             nullable_mark = "?" if is_nullable else ""
             fields.append(f"final List<{item_class}>{nullable_mark} {field_name};")
             constructor_params.append(f"this.{field_name}")
             from_json_lines.append(
-                f"{field_name}: json['{json_key}'] != null ? (json['{json_key}'] as List).map((e) => {item_class}.fromJson(e)).toList() : null"
+                f"{field_name}: json['{json_key}'] != null\n          ? (json['{json_key}'] as List).map((e) => {item_class}.fromJson(e)).toList()\n          : null"
             )
-            to_json_lines.append(f"'{json_key}': {field_name}?.map((e) => e.toJson()).toList()")
         
         # Handle simple lists
         elif isinstance(json_value, list):
             nullable_mark = "?" if is_nullable else ""
             fields.append(f"final {dart_type}{nullable_mark} {field_name};")
             constructor_params.append(f"this.{field_name}")
-            from_json_lines.append(f"{field_name}: json['{json_key}'] != null ? List.from(json['{json_key}']) : null")
-            to_json_lines.append(f"'{json_key}': {field_name}")
+            from_json_lines.append(
+                f"{field_name}: json['{json_key}'] != null\n          ? List.from(json['{json_key}'])\n          : null"
+            )
         
         # Handle primitives
         else:
@@ -177,47 +191,54 @@ def generate_class(class_name, data, indent=0):
             fields.append(f"final {dart_type}{nullable_mark} {field_name};")
             constructor_params.append(f"{required_mark}this.{field_name}")
             from_json_lines.append(f"{field_name}: json['{json_key}']")
-            to_json_lines.append(f"'{json_key}': {field_name}")
     
     # Build class string
-    class_str = f"{ind}class {class_name} {{\n"
+    class_str = f"class {class_name} {{\n"
     
     # Fields
     for field in fields:
-        class_str += f"{ind}  {field}\n"
+        class_str += f"  {field}\n"
     
     # Constructor
-    class_str += f"\n{ind}  {class_name}({{\n"
+    class_str += f"\n  {class_name}({{\n"
     for param in constructor_params:
-        class_str += f"{ind}    {param},\n"
-    class_str += f"{ind}  }});\n\n"
+        class_str += f"    {param},\n"
+    class_str += f"  }});\n\n"
     
     # fromJson factory
-    class_str += f"{ind}  factory {class_name}.fromJson(Map<String, dynamic> json) {{\n"
-    class_str += f"{ind}    return {class_name}(\n"
+    class_str += f"  factory {class_name}.fromJson(Map<String, dynamic> json) {{\n"
+    class_str += f"    return {class_name}(\n"
     for line in from_json_lines:
-        class_str += f"{ind}      {line},\n"
-    class_str += f"{ind}    );\n"
-    class_str += f"{ind}  }}\n\n"
+        class_str += f"      {line},\n"
+    class_str += f"    );\n"
+    class_str += f"  }}\n"
     
-    # toJson method
-    class_str += f"{ind}  Map<String, dynamic> toJson() {{\n"
-    class_str += f"{ind}    return {{\n"
-    for line in to_json_lines:
-        class_str += f"{ind}      {line},\n"
-    class_str += f"{ind}    }};\n"
-    class_str += f"{ind}  }}\n"
+    class_str += f"}}\n"
     
-    class_str += f"{ind}}}\n"
-    
-    classes.append(class_str)
-    return classes
+    return class_str
 
-# Generate all classes
-all_classes = generate_class(class_name, data)
+# Collect all nested classes
+all_nested_classes = collect_nested_classes(data)
+
+# Remove duplicates while preserving order
+seen = set()
+unique_nested_classes = []
+for class_name, class_data in all_nested_classes:
+    if class_name not in seen:
+        seen.add(class_name)
+        unique_nested_classes.append((class_name, class_data))
+
+# Generate main class first
+output = generate_class_code(class_name, data)
+output += "\n"
+
+# Generate nested classes in order
+for nested_class_name, nested_class_data in unique_nested_classes:
+    output += generate_class_code(nested_class_name, nested_class_data)
+    output += "\n"
 
 # Print output
-print("\n".join(all_classes))
+print(output.rstrip())
 PYTHON_SCRIPT
 }
 
