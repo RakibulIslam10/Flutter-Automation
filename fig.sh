@@ -3,13 +3,20 @@
 FIGMA_URL=$1
 OUTPUT_FILE=$2
 
-# Extract Figma File Key from URL and remove query params
-FIGMA_KEY=$(echo "$FIGMA_URL" | grep -oP '(?<=figma.com/(file|design)/)[^/?]+' | head -n1)
+if [[ -z "$FIGMA_URL" || -z "$OUTPUT_FILE" ]]; then
+  echo "Usage: $0 <Figma Public File URL> <Output Dart File>"
+  exit 1
+fi
+
+# Extract Figma File Key (works for /file/ and /design/ URLs, strips query params)
+FIGMA_KEY=$(echo "$FIGMA_URL" | sed -E 's|https://www\.figma\.com/(file|design)/([^/?]+).*|\2|')
 
 if [[ -z "$FIGMA_KEY" ]]; then
   echo "❌ Invalid Figma URL"
   exit 1
 fi
+
+echo "🔗 Using Figma File Key: $FIGMA_KEY"
 
 # Check Node.js
 if ! command -v node &> /dev/null; then
@@ -17,7 +24,7 @@ if ! command -v node &> /dev/null; then
   exit 1
 fi
 
-# Temporary Node.js script
+# Create temporary Node.js script
 TMP_JS=$(mktemp)
 cat <<'EOF' > $TMP_JS
 const axios = require('axios');
@@ -65,9 +72,14 @@ axios.get(`https://api.figma.com/v1/files/${FIGMA_KEY}`)
     fs.writeFileSync(OUTPUT_FILE, dartCode, 'utf8');
     console.log(`✅ Dart file created at ${OUTPUT_FILE} with ${textNodes.length} text nodes.`);
   })
-  .catch(err => console.error(err));
+  .catch(err => {
+    console.error("❌ Error fetching Figma file:", err.message || err);
+    process.exit(1);
+  });
 EOF
 
 # Run Node.js script
 node $TMP_JS "$FIGMA_KEY" "$OUTPUT_FILE"
+
+# Cleanup
 rm -f $TMP_JS
