@@ -3,8 +3,8 @@
 FIGMA_URL=$1
 OUTPUT_FILE=$2
 
-# Extract Figma File Key from URL (works with /file/ and /design/)
-FIGMA_KEY=$(echo "$FIGMA_URL" | grep -oP '(?<=figma.com/(file|design)/)[^/?]+')
+# Extract Figma File Key from URL and remove query params
+FIGMA_KEY=$(echo "$FIGMA_URL" | grep -oP '(?<=figma.com/(file|design)/)[^/?]+' | head -n1)
 
 if [[ -z "$FIGMA_KEY" ]]; then
   echo "❌ Invalid Figma URL"
@@ -17,7 +17,7 @@ if ! command -v node &> /dev/null; then
   exit 1
 fi
 
-# Create temporary Node.js script
+# Temporary Node.js script
 TMP_JS=$(mktemp)
 cat <<'EOF' > $TMP_JS
 const axios = require('axios');
@@ -37,7 +37,6 @@ axios.get(`https://api.figma.com/v1/files/${FIGMA_KEY}`)
           .toLowerCase()
           .replace(/[^a-z0-9]+/g, '_')
           .replace(/^_+|_+$/g, '');
-        // Avoid duplicate keys
         let originalKey = key;
         let counter = 1;
         while (keySet.has(key) || key === "") {
