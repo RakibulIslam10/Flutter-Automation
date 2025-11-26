@@ -169,7 +169,41 @@ class AppStorage {
 }
 EOF
 
+echo "✅ app_storage.dart created"
+
+# app_storage_model.dart
+cat > "$BASE_DIR/core/utils/app_storage_model.dart" <<EOF
+class AppStorageModel {
+  final String token;
+  final String userId;
+  final String temporaryToken;
+  final String mobileCode;
+  final bool onboardSave;
+  final String waitTime;
+  final bool isLoggedIn;
+  final bool isEmailVerified;
+  final bool isKycVerified;
+  final bool isSmsVerified;
+  final int kycStatus;
+
+  AppStorageModel(
+    this.token,
+    this.userId,
+    this.onboardSave,
+    this.waitTime,
+    this.isLoggedIn,
+    this.isEmailVerified,
+    this.isKycVerified,
+    this.isSmsVerified,
+    this.kycStatus, {
+    required this.temporaryToken,
+    required this.mobileCode,
+  });
+}
+EOF
+
 echo "✅ app_storage_model.dart created"
+
 
 # space.dart
 cat > "$BASE_DIR/core/utils/space.dart" <<EOF
