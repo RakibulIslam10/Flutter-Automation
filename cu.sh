@@ -99,6 +99,7 @@ class AppStorage {
   static final GetStorage _storage = GetStorage();
 
   static const String tokenKey = 'token';
+  static const String userIdKey = 'userId';
   static const String temporaryTokenKey = 'temporaryToken';
   static const String mobileCodeKey = 'mobileCode';
   static const String onboardSaveKey = 'onboardSave';
@@ -111,6 +112,7 @@ class AppStorage {
 
   static Future<void> save({
     String? token,
+    String? userId,
     String? temporaryToken,
     String? mobileCode,
     bool? onboardSave,
@@ -122,6 +124,7 @@ class AppStorage {
     bool? isKycStatus,
   }) async {
     if (token != null) await _storage.write(tokenKey, token);
+    if (userId != null) await _storage.write(userIdKey, userId);
     if (temporaryToken != null) await _storage.write(temporaryTokenKey, temporaryToken);
     if (mobileCode != null) await _storage.write(mobileCodeKey, mobileCode);
     if (onboardSave != null) await _storage.write(onboardSaveKey, onboardSave);
@@ -134,6 +137,7 @@ class AppStorage {
   }
 
   static String get token => _storage.read(tokenKey) ?? '';
+  static String get userId => _storage.read(userIdKey) ?? '';
   static String get temporaryToken => _storage.read(temporaryTokenKey) ?? '';
   static String get mobileCode => _storage.read(mobileCodeKey) ?? '';
   static String get waitTime => _storage.read(waitTimeKey) ?? '01:00';
@@ -147,6 +151,7 @@ class AppStorage {
   static AppStorageModel get common {
     return AppStorageModel(
       _storage.read(tokenKey) ?? '',
+      _storage.read(userIdKey) ?? '',
       _storage.read(onboardSaveKey) ?? false,
       _storage.read(waitTimeKey) ?? '01:00',
       _storage.read(isLoggedInKey) ?? false,
@@ -161,37 +166,6 @@ class AppStorage {
     static Future<void> clear() async {
     await _storage.erase();
   }
-}
-EOF
-
-echo "✅ app_storage.dart created"
-
-# app_storage_model.dart
-cat > "$BASE_DIR/core/utils/app_storage_model.dart" <<EOF
-class AppStorageModel {
-  final String token;
-  final String temporaryToken;
-  final String mobileCode;
-  final bool onboardSave;
-  final String waitTime;
-  final bool isLoggedIn;
-  final bool isEmailVerified;
-  final bool isKycVerified;
-  final bool isSmsVerified;
-  final int kycStatus;
-
-  AppStorageModel(
-    this.token,
-    this.onboardSave,
-    this.waitTime,
-    this.isLoggedIn,
-    this.isEmailVerified,
-    this.isKycVerified,
-    this.isSmsVerified,
-    this.kycStatus, {
-    required this.temporaryToken,
-    required this.mobileCode,
-  });
 }
 EOF
 
