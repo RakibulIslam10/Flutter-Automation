@@ -41,9 +41,27 @@ fileName="${modelName}_model.dart"
 
 # -------- JSON Input (Multiline) --------
 echo ""
-echo "📥 Paste your JSON below (Press CTRL+D when done):"
+echo "📥 Paste your JSON below (Press Enter twice when done):"
 echo "───────────────────────────────────────────────────"
-jsonInput=$(cat)
+
+jsonInput=""
+emptyLineCount=0
+
+while IFS= read -r line; do
+  if [ -z "$line" ]; then
+    ((emptyLineCount++))
+    if [ $emptyLineCount -ge 2 ]; then
+      break
+    fi
+  else
+    emptyLineCount=0
+    if [ -n "$jsonInput" ]; then
+      jsonInput="$jsonInput
+"
+    fi
+    jsonInput="$jsonInput$line"
+  fi
+done
 
 if [ -z "$jsonInput" ]; then
   echo "❌ No JSON input provided!"
