@@ -2,9 +2,10 @@
 set -euo pipefail
 
 # ==================== Configuration ====================
-echo "╔═══════════════════════════════════════════════════╗"
-echo "║   Production-Ready Dart Model Generator v2.0     ║"
-echo "╚═══════════════════════════════════════════════════╝"
+echo ">>> Initializing..."
+echo ">>> Compiling Dart Data Models..."
+echo ">>> Loading GetX Structures..."
+echo ">>> Launching v2.0 — SUCCESS ✔️"
 echo ""
 
 # -------- Input View Name --------
@@ -348,15 +349,13 @@ fi
 echo "$dartModel" > "$viewDir/$fileName"
 
 echo ""
-echo "✅ Model generated successfully!"
-echo "📁 Location: $viewDir/$fileName"
-echo "📄 File: $fileName"
-echo "🎯 Class: $className"
-echo ""
-echo "🚀 Features included:"
-echo "   ✓ Null safety support"
-echo "   ✓ fromJson() factory constructor"
-echo "   ✓ Nested classes support"
-echo "   ✓ DateTime parsing"
-echo "   ✓ Type-safe list handling"
+  echo -e "╔════════════════════════════════════════════════════════════╗"
+  echo -e "  ✅ Model generated successfully!"
+  echo "     🚀 Features included:"
+  echo "        ✓ Null safety support"
+  echo "        ✓ DateTime parsing"
+  echo "        ✓ Type-safe list handling"
+  echo "        ✓ fromJson() factory constructor"
+echo "          ✓ Nested classes support"
+  echo -e "╚════════════════════════════════════════════════════════════╝"
 echo ""
