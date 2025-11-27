@@ -203,8 +203,8 @@ def get_dart_type(value: Any, key_name: str = "") -> Tuple[str, bool]:
     else:
         return "dynamic", True
 
-def collect_nested_classes(data: Any, parent_class: str = "") -> List[Tuple[str, Dict]]:
-    """Recursively collect all nested class definitions"""
+def collect_nested_classes(data: Any, parent_class: str = "", depth: int = 0) -> List[Tuple[str, Dict, int]]:
+    """Recursively collect all nested class definitions with depth tracking"""
     nested_classes = []
     
     if not isinstance(data, dict):
@@ -214,14 +214,14 @@ def collect_nested_classes(data: Any, parent_class: str = "") -> List[Tuple[str,
         # Handle nested objects
         if isinstance(json_value, dict):
             nested_class_name = to_pascal_case(json_key)
-            nested_classes.extend(collect_nested_classes(json_value, nested_class_name))
-            nested_classes.append((nested_class_name, json_value))
+            nested_classes.extend(collect_nested_classes(json_value, nested_class_name, depth + 1))
+            nested_classes.append((nested_class_name, json_value, depth))
         
         # Handle list of objects
         elif isinstance(json_value, list) and len(json_value) > 0 and isinstance(json_value[0], dict):
             item_class = to_pascal_case(singularize(json_key))
-            nested_classes.extend(collect_nested_classes(json_value[0], item_class))
-            nested_classes.append((item_class, json_value[0]))
+            nested_classes.extend(collect_nested_classes(json_value[0], item_class, depth + 1))
+            nested_classes.append((item_class, json_value[0], depth))
     
     return nested_classes
 
@@ -296,25 +296,28 @@ def generate_class_code(class_name: str, data: Dict) -> str:
     
     return class_str
 
-# Collect all nested classes
+# Collect all nested classes with depth
 all_nested_classes = collect_nested_classes(data)
 
-# Remove duplicates while preserving order
+# Remove duplicates while preserving order and depth
 seen: Set[str] = set()
-unique_nested_classes: List[Tuple[str, Dict]] = []
-for cls_name, cls_data in all_nested_classes:
+unique_nested_classes: List[Tuple[str, Dict, int]] = []
+for cls_name, cls_data, depth in all_nested_classes:
     if cls_name not in seen:
         seen.add(cls_name)
-        unique_nested_classes.append((cls_name, cls_data))
+        unique_nested_classes.append((cls_name, cls_data, depth))
 
-# Generate nested classes first (bottom-up approach)
-output = ""
-for nested_class_name, nested_class_data in unique_nested_classes:
+# Sort by depth (shallowest first = main classes first)
+unique_nested_classes.sort(key=lambda x: x[2])
+
+# Generate main class first
+output = generate_class_code(class_name, data)
+output += "\n"
+
+# Generate nested classes sorted by hierarchy (top to bottom)
+for nested_class_name, nested_class_data, _ in unique_nested_classes:
     output += generate_class_code(nested_class_name, nested_class_data)
     output += "\n"
-
-# Generate main class last
-output += generate_class_code(class_name, data)
 
 print(output.rstrip())
 PYTHON_SCRIPT
