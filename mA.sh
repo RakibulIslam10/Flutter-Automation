@@ -122,10 +122,6 @@ def singularize(text: str) -> str:
             return text[:-3] + 'fe'
         return text[:-3] + 'f'
     
-    # Words ending in 'ses' -> 's' (classes → class, courses → course)
-    if text.endswith('ses') and len(text) > 3:
-        return text[:-2]
-    
     # Words ending in 'xes', 'ches', 'shes', 'sses' -> remove 'es'
     if len(text) > 3 and text.endswith(('xes', 'ches', 'shes', 'sses')):
         return text[:-2]
@@ -137,6 +133,15 @@ def singularize(text: str) -> str:
     # Words ending in 'zes' -> 'ze' (prizes → prize)
     if text.endswith('zes') and len(text) > 3:
         return text[:-1]
+    
+    # Special case: "ses" at end but NOT double s
+    # courses → course, houses → house (but NOT classes → clas)
+    if text.endswith('ses') and len(text) > 3 and text[-4] not in ['s']:
+        return text[:-2]
+    
+    # Words ending in 'sses' -> 'ss' (classes → class)
+    if text.endswith('sses') and len(text) > 4:
+        return text[:-2]
     
     # Default: just remove 's' if word ends with 's'
     if text.endswith('s') and len(text) > 1 and not text.endswith('ss'):
@@ -307,17 +312,24 @@ for cls_name, cls_data, depth in all_nested_classes:
         seen.add(cls_name)
         unique_nested_classes.append((cls_name, cls_data, depth))
 
-# Sort by depth (shallowest first = main classes first)
+# Sort by depth (shallowest/top-level first, then deeper nested)
 unique_nested_classes.sort(key=lambda x: x[2])
 
 # Generate main class first
 output = generate_class_code(class_name, data)
 output += "\n"
 
-# Generate nested classes sorted by hierarchy (top to bottom)
-for nested_class_name, nested_class_data, _ in unique_nested_classes:
-    output += generate_class_code(nested_class_name, nested_class_data)
-    output += "\n"
+# Generate second-level classes (like Data)
+for nested_class_name, nested_class_data, depth in unique_nested_classes:
+    if depth == 0:  # Direct children of main class
+        output += generate_class_code(nested_class_name, nested_class_data)
+        output += "\n"
+
+# Generate deeper nested classes
+for nested_class_name, nested_class_data, depth in unique_nested_classes:
+    if depth > 0:  # Deeper nested classes
+        output += generate_class_code(nested_class_name, nested_class_data)
+        output += "\n"
 
 print(output.rstrip())
 PYTHON_SCRIPT
