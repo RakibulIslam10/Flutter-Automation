@@ -39,10 +39,11 @@ to_pascal() {
 className=$(to_pascal "$modelName")
 fileName="${modelName}_model.dart"
 
-# -------- JSON Input --------
+# -------- JSON Input (Multiline) --------
 echo ""
-echo "📥 Paste your JSON below and press Enter:"
-read -r jsonInput
+echo "📥 Paste your JSON below (Press CTRL+D when done):"
+echo "───────────────────────────────────────────────────"
+jsonInput=$(cat)
 
 if [ -z "$jsonInput" ]; then
   echo "❌ No JSON input provided!"
