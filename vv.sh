@@ -115,6 +115,25 @@ EOF
   route_code="GetPage(\n    name: Routes.${viewName}Screen,\n    page: () => const ${capitalizedViewName}Screen(),\n    binding: ${capitalizedViewName}Binding(),\n  ),"
   sed -i "/\/\/Page Route List/a $route_code" "$page_file"
 
+
+# RAKIB Hacker-Style Banner
+echo "██████╗░░█████╗░██╗░░██╗██╗██████╗░"
+echo "██╔══██╗██╔══██╗██║░░██║██║██╔══██╗"
+echo "██████╦╝███████║███████║██║██████╔╝"
+echo "██╔══██╗██╔══██║██╔══██║██║██╔══██╗"
+echo "██████╦╝██║░░██║██║░░██║██║██║░░██║"
+echo "╚═════╝░╚═╝░░╚═╝╚═╝░░╚═╝╚═╝╚═╝░░╚═╝"
+echo ""
+
+# Hacker-style success log
+echo "[*] Initializing Dart Model Generator..."
+echo "[*] Loading modules..."
+echo "[*] Injecting RAKIB models..."
+echo "[✔] Payload accepted."
+echo "[✔] Execution complete."
+echo "[✔] No anomalies detected."
+echo ""
+
   # ✨ Fancy Success Log
   echo -e "╔════════════════════════════════════════════════════════════╗"
   echo -e "  🚀✨ Successfully Created Your View 🎉🧩📱🔗"
