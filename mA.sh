@@ -52,13 +52,13 @@ fi
 
 # -------- Python Generator --------
 generateModel() {
-python3 - "$className" "$jsonInput" <<'PYTHON_SCRIPT'
+python3 <<PYTHON_SCRIPT
 import sys
 import json
 import re
 
-class_name = sys.argv[1]
-json_str = sys.argv[2]
+json_str = '''$jsonInput'''
+class_name = "$className"
 
 try:
     data = json.loads(json_str)
