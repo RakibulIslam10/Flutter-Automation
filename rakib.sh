@@ -2,45 +2,81 @@
 
 case "$1" in
 
-"generate-views")
+# -------------------------------------------------------------
+#                🚀 Project Setup
+# -------------------------------------------------------------
+
+# 1️⃣  run => chmod +x rakib.sh       (only first time do this)
+
+# 2️⃣   run => ./rakib.sh make-my-temp
+
+# 3️⃣  Add widgets dir in /lib
+
+# 4️⃣  Replace all import with project name
+#     (Ctrl + Shift + R)
+
+# 5️⃣   run => ./rakib.sh make-views   (name with splash + route import)
+
+# 6️⃣  run => dart run build_runner build
+
+# 7️⃣  run => ./rakib.sh gen-clean-yaml   (name with rakib_temp)
+
+#     flutter clean
+#     flutter pub get
+#     flutter run
+
+
+
+
+
+"make-str")
+    echo "🛠️ Creating Flutter project folder structure..."
+    curl -sSL https://raw.githubusercontent.com/ai-py-auto/f-A/refs/heads/main/cs.sh | bash
+    curl -sSL https://raw.githubusercontent.com/ai-py-auto/f-A/refs/heads/main/cu.sh | bash
+    # curl -sSL https://raw.githubusercontent.com/ai-py-auto/f-A/refs/heads/main/py.sh | bash
+    ;;
+"make-views")
     # shellcheck disable=SC2162
     read -p "📥 Enter View Names (space-separated): " viewNames
-    curl -sSL https://raw.githubusercontent.com/RakibulIslam10/Flutter-Automation/refs/heads/main/vv.sh | bash -s $viewNames
+    curl -sSL https://raw.githubusercontent.com/ai-py-auto/f-A/refs/heads/main/vv.sh | bash -s "$viewNames"
     ;;
-
-"generate-widget")
-    # shellcheck disable=SC2162
-    read -p "Enter View Name: " viewName
-    # shellcheck disable=SC2162
-    read -p "📥 Enter Widget Names (space-separated): " widgetNames
-    IFS=' ' read -r -a widgetArray <<< "$widgetNames"
-    curl -sSL https://raw.githubusercontent.com/RakibulIslam10/Flutter-Automation/refs/heads/main/widt.sh | bash -s "$viewName" "${widgetArray[@]}"
-    ;;
-
-"create-structure")
-    echo "🛠️ Creating Flutter project folder structure..."
-    curl -sSL https://raw.githubusercontent.com/RakibulIslam10/Flutter-Automation/refs/heads/main/cs.sh | bash
-    curl -sSL https://raw.githubusercontent.com/RakibulIslam10/Flutter-Automation/refs/heads/main/cu.sh | bash
-#    curl -sSL https://raw.githubusercontent.com/RakibulIslam10/Flutter-Automation/refs/heads/main/py.sh | bash
-    ;;
-
-"generate-api-method")
-    echo "🛠️ Creating Api Method..."
-    curl -sSL https://raw.githubusercontent.com/RakibulIslam10/Flutter-Automation/refs/heads/main/am.sh | bash
-    ;;
-
-
-"generate-clean-yaml")
+"clean-yaml")
     # 📥 Ask user for project name and description
     # shellcheck disable=SC2162
     read -p "📥 Enter Project Name: " projectName
     # shellcheck disable=SC2162
     read -p "📥 Enter Project Description: " projectDescription
-
     # 🔗 Call remote script with projectName and description as arguments
-    curl -sSL https://raw.githubusercontent.com/RakibulIslam10/Flutter-Automation/refs/heads/main/ml.sh | bash -s "$projectName" "$projectDescription"
+    curl -sSL https://raw.githubusercontent.com/ai-py-auto/f-A/refs/heads/main/ml.sh | bash -s "$projectName" "$projectDescription"
     ;;
+"auto-model")
+    echo "📥 Downloading Auto-Model Script..."
+    tmpScript=$(mktemp /tmp/auto_model_XXXXXX.sh)
 
+    if curl -sSL https://raw.githubusercontent.com/ai-py-auto/f-A/refs/heads/main/mA.sh -o "$tmpScript" 2>/dev/null; then
+        chmod +x "$tmpScript"
+        echo "🚀 Running Auto-Model Script..."
+        bash "$tmpScript"
+        rm -f "$tmpScript"
+    else
+        echo "❌ Failed to  script !"
+        echo "💡 Check your internet connection"
+        rm -f "$tmpScript"
+        exit 1
+    fi
+    ;;
+"make-widget")
+    # shellcheck disable=SC2162
+    read -p "Enter View Name: " viewName
+    # shellcheck disable=SC2162
+    read -p "📥 Enter Widget Names (space-separated): " widgetNames
+    IFS=' ' read -r -a widgetArray <<< "$widgetNames"
+    curl -sSL https://raw.githubusercontent.com/ai-py-auto/f-A/refs/heads/main/widt.sh | bash -s "$viewName" "${widgetArray[@]}"
+    ;;
+"api-method")
+    echo "🛠️ Creating Api Method..."
+    curl -sSL https://raw.githubusercontent.com/ai-py-auto/f-A/refs/heads/main/am.sh | bash
+    ;;
 #"get-dependencies")
 #    echo "🔽 Downloading & applying dependencies..."
 #    curl -sSL https://raw.githubusercontent.com/RakibulIslam10/Flutter-Automation/refs/heads/main/py.sh | bash
@@ -48,17 +84,19 @@ case "$1" in
 
 "setup-firebase")
     echo "📥 Downloading Firebase setup script..."
-    curl -sSL https://raw.githubusercontent.com/RakibulIslam10/Flutter-Automation/refs/heads/main/frbs.sh -o frbs.sh
+    curl -sSL https://raw.githubusercontent.com/ai-py-auto/f-A/refs/heads/main/frbs.sh -o frbs.sh
     chmod +x frbs.sh
     echo "🚀 Running Firebase setup..."
     ./frbs.sh
     ;;
-  
-  
-  "create-shaKey")
+  "make-shaKey")
       echo "🛠️ Creating SHA Key..."
-      curl -sSL https://raw.githubusercontent.com/RakibulIslam10/Flutter-Automation/refs/heads/main/sa.sh | bash
+      curl -sSL https://raw.githubusercontent.com/ai-py-auto/f-A/refs/heads/main/sa.sh | bash
       ;;
-
+  "delete-unused-assets")
+    echo " ----------delete-unused-assets..."
+    curl -sSL https://raw.githubusercontent.com/ai-py-auto/f-A/refs/heads/main/dA.sh | bash -s delete
+    ;;
+  *)
 
 esac
