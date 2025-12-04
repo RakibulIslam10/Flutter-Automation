@@ -2,28 +2,6 @@
 
 case "$1" in
 
-# -------------------------------------------------------------
-#                🚀 Project Setup
-# -------------------------------------------------------------
-
-# 1️⃣  run => chmod +x rakib.sh       (only first time do this)
-
-# 2️⃣   run => ./rakib.sh make-my-temp
-
-# 3️⃣  Add widgets dir in /lib
-
-# 4️⃣  Replace all import with project name
-#     (Ctrl + Shift + R)
-
-# 5️⃣   run => ./rakib.sh make-views   (name with splash + route import)
-
-# 6️⃣  run => dart run build_runner build
-
-# 7️⃣  run => ./rakib.sh gen-clean-yaml   (name with rakib_temp)
-
-#     flutter clean
-#     flutter pub get
-#     flutter run
 
 
 
